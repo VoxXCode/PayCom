@@ -1,98 +1,65 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as SplashScreen from 'expo-splash-screen';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useBuild } from '@/hooks/use-build';
+import { PayComColors } from '@/constants/theme';
+import { Header } from '@/components/paycom/header';
+import { Footer } from '@/components/paycom/footer';
+import { BuilderScreen } from '@/components/paycom/builder-screen';
+import { SavedBuildsScreen } from '@/components/paycom/saved-builds-screen';
+import { BenchmarksScreen } from '@/components/paycom/benchmarks-screen';
+import { CommunityScreen } from '@/components/paycom/community-screen';
+import { HomeScreen } from '@/components/paycom/home-screen';
+import { SwapModal } from '@/components/paycom/swap-modal';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function App() {
+  const { activeTab } = useBuild();
+
+  useEffect(() => {
+    // Hide splash screen when mounted
+    SplashScreen.hideAsync();
+  }, []);
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <View style={styles.container}>
+        <Header />
+        
+        <View style={styles.content}>
+          {activeTab === 'home' && <HomeScreen />}
+          {activeTab === 'builder' && <BuilderScreen />}
+          {activeTab === 'saved-builds' && <SavedBuildsScreen />}
+          {activeTab === 'benchmarks' && <BenchmarksScreen />}
+          {activeTab === 'community' && <CommunityScreen />}
+        </View>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <Footer />
+        <SwapModal />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    backgroundColor: 'rgba(13,17,23,0.95)',
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  container: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    backgroundColor: PayComColors.background,
+    ...(Platform.OS === 'web'
+      ? {
+          // Subtle radial gradient background pattern
+          backgroundImage: 'radial-gradient(#1f2937 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }
+      : {}),
   },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  content: {
+    flex: 1,
+    ...(Platform.OS === 'web' ? { marginTop: 56 } : {}), // Compensate for fixed header on web
   },
 });

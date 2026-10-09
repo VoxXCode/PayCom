@@ -1,6 +1,6 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * PayCom Rig Configurator Theme
+ * Cyberpunk-inspired dark theme with cyan/neon accents
  */
 
 import '@/global.css';
@@ -9,32 +9,86 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#dfe2eb',
+    background: '#10141a',
+    backgroundElement: '#1c2026',
+    backgroundSelected: '#262a31',
+    textSecondary: '#b9cacb',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#dfe2eb',
+    background: '#10141a',
+    backgroundElement: '#1c2026',
+    backgroundSelected: '#262a31',
+    textSecondary: '#b9cacb',
   },
+} as const;
+
+// PayCom Design System Colors
+export const PayComColors = {
+  // Primary
+  primary: '#dbfcff',
+  primaryContainer: '#00f0ff',
+  onPrimaryContainer: '#006970',
+  onPrimary: '#00363a',
+
+  // Secondary
+  secondary: '#aec6ff',
+  secondaryContainer: '#508eff',
+  onSecondaryContainer: '#00275e',
+
+  // Tertiary
+  tertiary: '#fff3f3',
+  tertiaryContainer: '#ffcdd1',
+
+  // Error
+  error: '#ffb4ab',
+  errorContainer: '#93000a',
+  onError: '#690005',
+  onErrorContainer: '#ffdad6',
+
+  // Surface
+  surface: '#10141a',
+  surfaceDim: '#10141a',
+  surfaceBright: '#353940',
+  surfaceContainer: '#1c2026',
+  surfaceContainerLow: '#181c22',
+  surfaceContainerHigh: '#262a31',
+  surfaceContainerHighest: '#31353c',
+  surfaceContainerLowest: '#0a0e14',
+  surfaceVariant: '#31353c',
+
+  // On Surface
+  onSurface: '#dfe2eb',
+  onSurfaceVariant: '#b9cacb',
+  onBackground: '#dfe2eb',
+  background: '#10141a',
+
+  // Outline
+  outline: '#849495',
+  outlineVariant: '#3b494b',
+
+  // Inverse
+  inverseSurface: '#dfe2eb',
+  inverseOnSurface: '#2d3137',
+  inversePrimary: '#006970',
+
+  // Fixed
+  primaryFixed: '#7df4ff',
+  primaryFixedDim: '#00dbe9',
+  secondaryFixed: '#d8e2ff',
+  secondaryFixedDim: '#aec6ff',
+  tertiaryFixed: '#ffd9dc',
+  tertiaryFixedDim: '#ffb2ba',
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -62,4 +116,4 @@ export const Spacing = {
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const MaxContentWidth = 1400;

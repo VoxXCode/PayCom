@@ -75,6 +75,18 @@ module.exports = {
         "label-mono-lg": ["JetBrains Mono"],
         "headline-xl-mobile": ["Plus Jakarta Sans"],
         "headline-lg": ["Plus Jakarta Sans"]
+      },
+      fontSize: {
+        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+        "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+        "headline-md": ["20px", { lineHeight: "28px", letterSpacing: -0.2, fontWeight: "600" }],
+        "headline-lg-mobile": ["22px", { lineHeight: "30px", letterSpacing: -0.22, fontWeight: "600" }],
+        "headline-xl": ["40px", { lineHeight: "48px", letterSpacing: -0.8, fontWeight: "700" }],
+        "label-mono-sm": ["11px", { lineHeight: "14px", letterSpacing: 0.55, fontWeight: "500" }],
+        "label-mono-lg": ["14px", { lineHeight: "20px", letterSpacing: 0.28, fontWeight: "500" }],
+        "headline-xl-mobile": ["28px", { lineHeight: "36px", letterSpacing: -0.28, fontWeight: "700" }],
+        "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: -0.56, fontWeight: "600" }]
       }
     }
   }

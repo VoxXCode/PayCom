@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -18,13 +18,45 @@ export default function SummaryScreen() {
     bottleneckText,
     voucherApplied,
     setVoucherApplied,
+    resetSlots,
     formatRupiah
   } = useBuild();
 
-  const shippingFee = filledCount > 0 ? 150000 : 0;
+  // Penerapan useState sesuai Modul 2
+  const [shippingOption, setShippingOption] = useState<'reguler' | 'express'>('reguler');
+  const [paymentMethod, setPaymentMethod] = useState<'qris' | 'va' | 'transfer'>('qris');
+  const [estimatedDelivery, setEstimatedDelivery] = useState<string>('2 - 3 Hari Kerja');
+  const [orderValidationMessage, setOrderValidationMessage] = useState<string>('');
+
+  // Penerapan useEffect (Pola 1 - Initial Mount / Render Pertama Kali)
+  useEffect(() => {
+    console.log('[Modul 2] SummaryScreen dimuat untuk pertama kali.');
+  }, []);
+
+  // Penerapan useEffect (Pola 2 - Reaktif saat state shippingOption atau filledCount berubah)
+  useEffect(() => {
+    if (filledCount === 0) {
+      setEstimatedDelivery('Menunggu pemilihan komponen');
+      setOrderValidationMessage('Pilih komponen terlebih dahulu agar rakitan dapat diproses.');
+    } else if (shippingOption === 'express') {
+      setEstimatedDelivery('1 Hari (Prioritas Perakitan & Tes Cepat)');
+      setOrderValidationMessage('Pengiriman express aktif: Unit dirakit dan dikirim hari ini.');
+    } else {
+      setEstimatedDelivery('2 - 3 Hari Kerja (Termasuk 24 Jam Stress Test)');
+      setOrderValidationMessage('Pengiriman reguler aktif: Perakitan & pengetesan standar.');
+    }
+  }, [shippingOption, filledCount]);
+
+  const shippingFee = filledCount > 0 ? (shippingOption === 'express' ? 300000 : 150000) : 0;
   const discount = (voucherApplied && filledCount > 0 && totalPrice > 500000) ? 500000 : 0;
   const grandTotal = Math.max(0, totalPrice + shippingFee - discount);
   const totalSavings = 250000 + discount;
+
+  // Modul 2 - Penerapan router.setParams() untuk mengubah parameter URL route aktif tanpa reload (Halaman 38)
+  const handleSelectShipping = (option: 'reguler' | 'express') => {
+    setShippingOption(option);
+    router.setParams({ shipping: option });
+  };
 
   const handleCheckout = () => {
     if (filledCount === 0) {
@@ -32,16 +64,28 @@ export default function SummaryScreen() {
         'Belum Ada Komponen',
         'Silakan pilih komponen terlebih dahulu di halaman Komponen sebelum melanjutkan.',
         [
+          // Modul 2 - Penerapan router.push() untuk navigasi ke halaman komponen
           { text: 'Pilih Komponen', onPress: () => router.push('/(tabs)') },
           { text: 'Batal', style: 'cancel' }
         ]
       );
       return;
     }
+    const paymentLabel = paymentMethod === 'qris' ? 'QRIS' : paymentMethod === 'va' ? 'Virtual Account' : 'Transfer Bank';
     Alert.alert(
       '🎉 Pesanan Diproses!',
-      `Rakitan PC kamu (${filledCount} item) senilai ${formatRupiah(grandTotal)} sedang diproses oleh tim PayCom. Kami akan segera menghubungi kamu!`,
-      [{ text: 'OK' }]
+      `Rakitan PC kamu (${filledCount} item) via ${paymentLabel} senilai ${formatRupiah(grandTotal)} sedang diproses. Estimasi tiba: ${estimatedDelivery}.`,
+      [
+        {
+          text: 'Mulai Rakitan Baru',
+          onPress: () => {
+            resetSlots();
+            // Modul 2 - Penerapan router.replace() untuk menghapus stack setelah checkout (Halaman 33)
+            router.replace('/(tabs)');
+          }
+        },
+        { text: 'Selesai' }
+      ]
     );
   };
 
@@ -51,10 +95,11 @@ export default function SummaryScreen() {
 
   const handlePDF = () => {
     if (filledCount === 0) {
-      Alert.alert('Rakitan Kosong', 'Pilih komponen terlebih dahulu untuk mencetak invoice.');
+      Alert.alert('Rakitan Kosong', 'Pilih komponen terlebih dahulu untuk melihat invoice.');
       return;
     }
-    Alert.alert('Cetak Invoice', `Invoice PDF untuk Rakitan #PC-8891 (${formatRupiah(grandTotal)}) akan dikirim ke email kamu.`, [{ text: 'OK' }]);
+    // Modul 2 - Navigasi membuka modal Stack.Screen (Halaman 35)
+    router.push('/invoice');
   };
 
   const handleDraft = () => {
@@ -197,6 +242,72 @@ export default function SummaryScreen() {
                 })}
               </ScrollView>
             )}
+          </View>
+
+          {/* Opsi Pengiriman & Pembayaran (Penerapan useState & useEffect) */}
+          <View className="rounded-xl bg-surface-container p-4 shadow-sm flex-col gap-3 mt-1">
+            <View className="flex-row items-center justify-between pb-1 border-b border-surface-variant/30">
+              <View className="flex-row items-center gap-2">
+                <MaterialIcons name="local-shipping" size={20} color="#4cd7f6" />
+                <Text className="text-[16px] text-on-surface font-bold">Opsi Pengiriman & Pembayaran</Text>
+              </View>
+            </View>
+
+            {/* Pilihan Metode Pengiriman */}
+            <View className="flex-col gap-1.5">
+              <Text className="text-[12px] text-outline font-medium">Metode Pengiriman:</Text>
+              <View className="flex-row gap-2">
+                <TouchableOpacity
+                  onPress={() => handleSelectShipping('reguler')}
+                  className={`flex-1 p-2.5 rounded-xl border ${shippingOption === 'reguler' ? 'bg-secondary/15 border-secondary' : 'bg-surface-container-low border-surface-variant/30'}`}
+                >
+                  <Text className={`text-[13px] font-semibold ${shippingOption === 'reguler' ? 'text-secondary' : 'text-on-surface'}`}>
+                    Reguler (+Rp 150rb)
+                  </Text>
+                  <Text className="text-[11px] text-on-surface-variant mt-0.5">Packing kayu + Asuransi</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleSelectShipping('express')}
+                  className={`flex-1 p-2.5 rounded-xl border ${shippingOption === 'express' ? 'bg-secondary/15 border-secondary' : 'bg-surface-container-low border-surface-variant/30'}`}
+                >
+                  <Text className={`text-[13px] font-semibold ${shippingOption === 'express' ? 'text-secondary' : 'text-on-surface'}`}>
+                    Express (+Rp 300rb)
+                  </Text>
+                  <Text className="text-[11px] text-on-surface-variant mt-0.5">Selesai rakit hari ini</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Pilihan Metode Pembayaran */}
+            <View className="flex-col gap-1.5 mt-1">
+              <Text className="text-[12px] text-outline font-medium">Metode Pembayaran:</Text>
+              <View className="flex-row gap-2">
+                {[
+                  { id: 'qris', name: 'QRIS Instan' },
+                  { id: 'va', name: 'Virtual Account' },
+                  { id: 'transfer', name: 'Transfer Bank' }
+                ].map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => setPaymentMethod(item.id as any)}
+                    className={`flex-1 py-2 px-1.5 rounded-lg items-center border ${paymentMethod === item.id ? 'bg-primary-container border-primary' : 'bg-surface-container-low border-surface-variant/30'}`}
+                  >
+                    <Text className={`text-[11px] font-semibold ${paymentMethod === item.id ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Estimasi Pengiriman Reaktif (dari useEffect) */}
+            <View className="p-2.5 rounded-lg bg-surface-container-low flex-row items-center gap-2 mt-1">
+              <MaterialIcons name="schedule" size={16} color="#4cd7f6" />
+              <View className="flex-1">
+                <Text className="text-[11px] text-outline font-medium">Estimasi Waktu Tiba:</Text>
+                <Text className="text-[12px] text-secondary font-semibold">{estimatedDelivery}</Text>
+              </View>
+            </View>
           </View>
 
           {/* Price Breakdown Card */}

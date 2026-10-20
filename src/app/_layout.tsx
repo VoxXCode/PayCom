@@ -14,8 +14,28 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <BuildProvider>
         <AnimatedSplashOverlay />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
+        {/* Modul 2 - Menerapkan _layout.tsx dan <Stack.Screen> (Halaman 30-31, 35, 40) */}
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: '#131318' }
+          }}
+        >
+          <Stack.Screen 
+            name="(tabs)" 
+            options={{ 
+              title: 'PayCom Studio',
+              headerShown: false 
+            }} 
+          />
+          <Stack.Screen 
+            name="invoice" 
+            options={{ 
+              title: 'Invoice Rakitan PC',
+              presentation: 'modal',
+              headerShown: false 
+            }} 
+          />
         </Stack>
       </BuildProvider>
     </ThemeProvider>

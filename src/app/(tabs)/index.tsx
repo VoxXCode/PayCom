@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Modal, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -25,21 +25,49 @@ export default function HomeScreen() {
     formatRupiah
   } = useBuild();
 
+  // Penerapan useState sesuai Modul 2
   const [activeSlotId, setActiveSlotId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [statusNotification, setStatusNotification] = useState<string>('Mulai rakit PC dengan memilih komponen.');
+
+  // Penerapan useEffect (Pola 1 - Initial Mount / Render Pertama Kali)
+  useEffect(() => {
+    console.log('[Modul 2] HomeScreen dimuat untuk pertama kali.');
+  }, []);
+
+  // Penerapan useEffect (Pola 2 - Reaktif saat dependency state/data berubah)
+  useEffect(() => {
+    if (filledCount === 0) {
+      setStatusNotification('Mulai rakit PC dengan memilih komponen pertama Anda.');
+    } else if (filledCount < 5) {
+      setStatusNotification(`${filledCount} dari 5 slot komponen telah terpasang.`);
+    } else {
+      setStatusNotification('🎉 Semua komponen utama lengkap! Siap untuk checkout.');
+    }
+  }, [filledCount]);
 
   const activeSlot = slots.find(s => s.id === activeSlotId);
   const availableItems = activeSlot ? CATALOG[activeSlot.category] || [] : [];
 
+  // Modul 2 - Penerapan router.setParams() untuk mengupdate parameter URL route aktif (Halaman 38)
   const handleOpenPicker = (slotId: string) => {
+    const slot = slots.find(s => s.id === slotId);
     setActiveSlotId(slotId);
     setIsModalOpen(true);
+    if (slot) {
+      router.setParams({ slot: slot.category });
+    }
+  };
+
+  const handleClosePicker = () => {
+    setIsModalOpen(false);
+    router.setParams({ slot: '' });
   };
 
   const handleSelectComponent = (item: CatalogItem) => {
     if (!activeSlotId) return;
     setSlotItem(activeSlotId, item);
-    setIsModalOpen(false);
+    handleClosePicker();
   };
 
   const handleRemoveComponent = (slotId: string) => {
@@ -150,6 +178,14 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Status Notification (Reaktif dari useEffect) */}
+        <View className="px-gutter pt-1 pb-1">
+          <View className="flex-row items-center gap-2 px-3 py-2 rounded-xl bg-surface-container-low/70 border border-surface-variant/30">
+            <MaterialIcons name="info-outline" size={16} color="#4cd7f6" />
+            <Text className="text-[12px] text-on-surface-variant flex-1">{statusNotification}</Text>
+          </View>
+        </View>
+
         {/* Component Slots List */}
         <View className="px-gutter flex-col gap-3 pt-2">
           {slots.map((slot) => {
@@ -255,11 +291,11 @@ export default function HomeScreen() {
         visible={isModalOpen}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setIsModalOpen(false)}
+        onRequestClose={handleClosePicker}
       >
         <Pressable 
           className="flex-1 bg-black/60 justify-end"
-          onPress={() => setIsModalOpen(false)}
+          onPress={handleClosePicker}
         >
           <Pressable 
             className="bg-surface-container rounded-t-3xl max-h-[75%] w-full overflow-hidden"
@@ -279,7 +315,7 @@ export default function HomeScreen() {
                 </Text>
               </View>
               <TouchableOpacity 
-                onPress={() => setIsModalOpen(false)}
+                onPress={handleClosePicker}
                 className="w-8 h-8 rounded-full bg-surface-container-high items-center justify-center"
               >
                 <MaterialIcons name="close" size={18} color="#c2c6d6" />

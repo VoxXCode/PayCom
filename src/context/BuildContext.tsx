@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export type CatalogItem = {
@@ -176,23 +176,39 @@ type BuildContextType = {
 const BuildContext = createContext<BuildContextType | null>(null);
 
 export function BuildProvider({ children }: { children: React.ReactNode }) {
+  // Penggunaan useState sesuai Modul 2
   const [slots, setSlots] = useState<BuildSlot[]>(DEFAULT_SLOTS);
-  const [voucherApplied, setVoucherApplied] = useState(true);
+  const [voucherApplied, setVoucherApplied] = useState<boolean>(true);
+  const [totalWattage, setTotalWattage] = useState<number>(0);
+  const [capacityPercent, setCapacityPercent] = useState<number>(0);
+  const [bottleneckText, setBottleneckText] = useState<string>('Belum Aktif');
 
   const filledSlots = slots.filter(s => s.selectedItem !== null);
   const filledCount = filledSlots.length;
   const totalPrice = slots.reduce((sum, s) => sum + (s.selectedItem?.price || 0), 0);
 
-  const totalWattage = slots.reduce((sum, s) => sum + (s.selectedItem?.wattage || 0), 0) + (filledCount > 0 ? 50 : 0);
-  const capacityPercent = Math.min(Math.round((totalWattage / 750) * 100), 100);
+  // Penggunaan useEffect: Dijalankan setiap kali state 'slots' berubah
+  useEffect(() => {
+    const computedWattage = slots.reduce((sum, s) => sum + (s.selectedItem?.wattage || 0), 0) + (filledSlots.length > 0 ? 50 : 0);
+    const computedCapacity = Math.min(Math.round((computedWattage / 750) * 100), 100);
 
-  const hasCpu = slots.some(s => s.category === 'CPU' && s.selectedItem !== null);
-  const hasGpu = slots.some(s => s.category === 'GPU' && s.selectedItem !== null);
-  const bottleneckText = (hasCpu && hasGpu)
-    ? '1.2% (Optimal)'
-    : filledCount > 0
-      ? 'Menunggu CPU & GPU'
-      : 'Belum Aktif';
+    const hasCpu = slots.some(s => s.category === 'CPU' && s.selectedItem !== null);
+    const hasGpu = slots.some(s => s.category === 'GPU' && s.selectedItem !== null);
+    const computedBottleneck = (hasCpu && hasGpu)
+      ? '1.2% (Optimal)'
+      : filledSlots.length > 0
+        ? 'Menunggu CPU & GPU'
+        : 'Belum Aktif';
+
+    setTotalWattage(computedWattage);
+    setCapacityPercent(computedCapacity);
+    setBottleneckText(computedBottleneck);
+  }, [slots]);
+
+  // Penggunaan useEffect: Initial mount effect (sekali saat aplikasi dimuat)
+  useEffect(() => {
+    console.log('[BuildContext] Sistem Rakitan PayCom terinisialisasi.');
+  }, []);
 
   const setSlotItem = (slotId: string, item: CatalogItem) => {
     setSlots(prev => prev.map(slot => {

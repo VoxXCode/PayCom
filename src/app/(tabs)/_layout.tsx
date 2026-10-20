@@ -57,8 +57,8 @@ function CustomTabBar() {
 export default function TabLayout() {
   return (
     <Tabs tabBar={() => <CustomTabBar />} screenOptions={{ headerShown: false }}>
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="explore" />
+      <Tabs.Screen name="index" options={{ title: "Komponen" }} />
+      <Tabs.Screen name="explore" options={{ title: "Ringkasan" }} />
     </Tabs>
   );
 }

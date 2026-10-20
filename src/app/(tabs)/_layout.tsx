@@ -19,35 +19,35 @@ function CustomTabBar() {
     >
       <View className="flex-row justify-around items-center h-16 px-space-xs">
         <TouchableOpacity 
-          className="flex-col items-center justify-center min-w-[56px] h-12 gap-0.5"
+          className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
           onPress={() => router.push('/(tabs)')}
         >
-          <MaterialIcons name="grid-view" size={22} color={isTabActive(['/', '/(tabs)']) ? '#4cd7f6' : '#c2c6d6'} />
-          <Text className={`font-label-mono-sm text-[11px] uppercase tracking-tighter ${isTabActive(['/', '/(tabs)']) ? 'text-secondary' : 'text-on-surface-variant'}`}>Komponen</Text>
+          <MaterialIcons name="grid-view" size={22} color={pathname === '/' || pathname === '/(tabs)' ? '#4cd7f6' : '#c2c6d6'} />
+          <Text className={`text-[11px] ${pathname === '/' || pathname === '/(tabs)' ? 'text-secondary font-semibold' : 'text-on-surface-variant font-medium'}`}>Komponen</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          className="flex-col items-center justify-center min-w-[56px] h-12 gap-0.5"
-          onPress={() => {}}
+          className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
+          onPress={() => router.push('/(tabs)/explore')}
         >
-          <MaterialIcons name="analytics" size={22} color="#c2c6d6" />
-          <Text className="font-label-mono-sm text-[11px] uppercase tracking-tighter text-on-surface-variant">Ringkasan</Text>
+          <MaterialIcons name="analytics" size={22} color={pathname.includes('explore') ? '#4cd7f6' : '#c2c6d6'} />
+          <Text className={`text-[11px] ${pathname.includes('explore') ? 'text-secondary font-semibold' : 'text-on-surface-variant font-medium'}`}>Ringkasan</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          className="flex-col items-center justify-center min-w-[56px] h-12 gap-0.5"
+          className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
           onPress={() => {}}
         >
           <MaterialIcons name="speed" size={22} color="#c2c6d6" />
-          <Text className="font-label-mono-sm text-[11px] uppercase tracking-tighter text-on-surface-variant">Simulasi</Text>
+          <Text className="text-[11px] font-medium text-on-surface-variant">Simulasi</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          className="flex-col items-center justify-center min-w-[56px] h-12 gap-0.5"
+          className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
           onPress={() => {}}
         >
           <MaterialIcons name="tune" size={22} color="#c2c6d6" />
-          <Text className="font-label-mono-sm text-[11px] uppercase tracking-tighter text-on-surface-variant">Profil</Text>
+          <Text className="text-[11px] font-medium text-on-surface-variant">Profil</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -58,6 +58,7 @@ export default function TabLayout() {
   return (
     <Tabs tabBar={() => <CustomTabBar />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" />
+      <Tabs.Screen name="explore" />
     </Tabs>
   );
 }

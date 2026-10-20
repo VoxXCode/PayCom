@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { BuildProvider } from '../context/BuildContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -11,10 +12,12 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+      <BuildProvider>
+        <AnimatedSplashOverlay />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </BuildProvider>
     </ThemeProvider>
   );
 }

@@ -36,18 +36,26 @@ function CustomTabBar() {
 
         <TouchableOpacity 
           className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
-          onPress={() => {}}
+          onPress={() => router.push('/(tabs)/simulation')}
         >
-          <MaterialIcons name="speed" size={22} color="#c2c6d6" />
-          <Text className="text-[11px] font-medium text-on-surface-variant">Simulasi</Text>
+          <MaterialIcons 
+            name="speed" 
+            size={22} 
+            color={pathname.includes('simulation') ? '#4cd7f6' : '#c2c6d6'} 
+          />
+          <Text className={`text-[11px] ${pathname.includes('simulation') ? 'text-secondary font-semibold' : 'text-on-surface-variant font-medium'}`}>Simulasi</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
           className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
-          onPress={() => {}}
+          onPress={() => router.push('/(tabs)/profile')}
         >
-          <MaterialIcons name="tune" size={22} color="#c2c6d6" />
-          <Text className="text-[11px] font-medium text-on-surface-variant">Profil</Text>
+          <MaterialIcons 
+            name="person" 
+            size={22} 
+            color={pathname.includes('profile') ? '#4cd7f6' : '#c2c6d6'} 
+          />
+          <Text className={`text-[11px] ${pathname.includes('profile') ? 'text-secondary font-semibold' : 'text-on-surface-variant font-medium'}`}>Profil</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -59,6 +67,8 @@ export default function TabLayout() {
     <Tabs tabBar={() => <CustomTabBar />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" options={{ title: "Komponen" }} />
       <Tabs.Screen name="explore" options={{ title: "Ringkasan" }} />
+      <Tabs.Screen name="simulation" options={{ title: "Simulasi" }} />
+      <Tabs.Screen name="profile" options={{ title: "Profil" }} />
     </Tabs>
   );
 }

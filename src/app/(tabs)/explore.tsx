@@ -55,7 +55,7 @@ export default function SummaryScreen() {
   // Modul 2 - Penerapan router.setParams() untuk mengubah parameter URL route aktif tanpa reload (Halaman 38)
   const handleSelectShipping = (option: 'reguler' | 'express') => {
     setShippingOption(option);
-    router.setParams({ shipping: option });
+    (router as any).setParams({ shipping: option });
   };
 
   const handleCheckout = () => {
@@ -141,8 +141,11 @@ export default function SummaryScreen() {
               <MaterialIcons name="language" size={16} color="#c2c6d6" />
               <Text className="text-[12px] text-on-surface-variant font-medium">EN</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low">
-              <MaterialIcons name="help-outline" size={20} color="#c2c6d6" />
+            <TouchableOpacity 
+              onPress={() => router.push('/(tabs)/profile')}
+              className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
+            >
+              <MaterialIcons name="person" size={20} color="#c2c6d6" />
             </TouchableOpacity>
           </View>
         </View>
@@ -195,6 +198,18 @@ export default function SummaryScreen() {
                 </View>
               </View>
             </View>
+
+            {/* Shortcut ke Tab Simulasi Modul 3 */}
+            <TouchableOpacity 
+              onPress={() => router.push('/(tabs)/simulation')}
+              className="mt-2 py-2 px-2.5 rounded-lg bg-surface-container flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center gap-2">
+                <MaterialIcons name="speed" size={16} color="#4cd7f6" />
+                <Text className="text-[12px] text-secondary font-medium">Uji Benchmark Rig di Simulasi (Modul 3)</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={14} color="#4cd7f6" />
+            </TouchableOpacity>
           </View>
 
           {/* Quick Hardware Visual Strip */}

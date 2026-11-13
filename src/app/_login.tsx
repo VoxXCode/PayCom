@@ -1,15 +1,48 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ImageBackground, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(true);
+
+  const handleLogin = () => {
+    if (!email.trim() && !password.trim()) {
+      Alert.alert('🎉 Berhasil Masuk', 'Selamat datang kembali di PayCom Studio!', [
+        {
+          text: 'Lanjut ke Profil',
+          onPress: () => router.replace('/(tabs)/profile'),
+        },
+      ]);
+      return;
+    }
+
+    Alert.alert('🎉 Berhasil Masuk', `Selamat datang kembali, ${email || 'Builder'}!`, [
+      {
+        text: 'Buka Profil',
+        onPress: () => router.replace('/(tabs)/profile'),
+      },
+      {
+        text: 'Mulai Rakit',
+        onPress: () => router.replace('/(tabs)'),
+      },
+    ]);
+  };
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
 
   return (
     <View className="flex-1 bg-surface">
@@ -22,9 +55,13 @@ export default function LoginScreen() {
       >
         <View className="h-16 px-gutter flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            
+            <TouchableOpacity 
+              onPress={handleBack}
+              className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
+            >
+              <MaterialIcons name="arrow-back" size={20} color="#c2c6d6" />
+            </TouchableOpacity>
             <View className="flex-row items-center gap-1">
-              
               <Text className="text-[20px] tracking-tight text-on-surface font-bold">
                 <Text className="text-secondary">Pay</Text>Com
               </Text>
@@ -35,7 +72,10 @@ export default function LoginScreen() {
               <MaterialIcons name="language" size={16} color="#c2c6d6" />
               <Text className="text-[12px] text-on-surface-variant font-medium">EN</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low">
+            <TouchableOpacity 
+              onPress={() => Alert.alert('Bantuan Login', 'Gunakan akun PayCom Anda atau masuk sebagai Tamu untuk langsung mulai merakit PC.')}
+              className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
+            >
               <MaterialIcons name="help-outline" size={20} color="#c2c6d6" />
             </TouchableOpacity>
           </View>
@@ -59,7 +99,6 @@ export default function LoginScreen() {
           {/* 1. Header / Brand Intro */}
           <View className="flex-col gap-2 relative z-10">
             <View className="flex-row items-center justify-between">
-              
               <View className="flex-row items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-lowest">
                 <View className="w-1.5 h-1.5 rounded-full bg-secondary" />
                 <Text className="text-[11px] text-on-surface-variant font-medium leading-none">v1.0 • PayCom</Text>
@@ -74,7 +113,6 @@ export default function LoginScreen() {
           {/* 2. Primary Hero Feature: Guest Mode */}
           <View className="relative z-10">
             <View className="rounded-xl p-4 bg-surface-container-high shadow-md overflow-hidden flex-col gap-2 relative">
-              {/* Ambient Backing in Card */}
               <View className="absolute -right-8 -bottom-8 w-32 h-32 bg-secondary/15 rounded-full" />
 
               <View className="flex-col relative z-10">
@@ -85,15 +123,16 @@ export default function LoginScreen() {
               </View>
 
               <View className="pt-2 relative z-10">
-                <Link href="/(tabs)" asChild>
-                  <TouchableOpacity className="w-full flex-row items-center justify-between px-4 py-3.5 rounded-xl bg-primary shadow-sm">
-                    <View className="flex-row items-center gap-2">
-                      <MaterialIcons name="build-circle" size={20} color="#002e6a" />
-                      <Text className="text-on-primary text-[15px] font-semibold">Mulai Rakit sebagai Tamu</Text>
-                    </View>
-                    <MaterialIcons name="arrow-forward" size={20} color="#002e6a" />
-                  </TouchableOpacity>
-                </Link>
+                <TouchableOpacity 
+                  onPress={() => router.replace('/(tabs)')}
+                  className="w-full flex-row items-center justify-between px-4 py-3.5 rounded-xl bg-primary shadow-sm"
+                >
+                  <View className="flex-row items-center gap-2">
+                    <MaterialIcons name="build-circle" size={20} color="#002e6a" />
+                    <Text className="text-on-primary text-[15px] font-semibold">Mulai Rakit sebagai Tamu</Text>
+                  </View>
+                  <MaterialIcons name="arrow-forward" size={20} color="#002e6a" />
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -116,6 +155,8 @@ export default function LoginScreen() {
               <View className="flex-row items-center rounded-xl bg-surface-container-lowest h-12 px-3">
                 <MaterialIcons name="badge" size={18} color="#c2c6d6" />
                 <TextInput 
+                  value={email}
+                  onChangeText={setEmail}
                   className="flex-1 h-full px-2 text-[14px] text-on-surface font-normal"
                   placeholder="builder@paycom.id"
                   placeholderTextColor="#8c909f"
@@ -129,13 +170,15 @@ export default function LoginScreen() {
             <View className="flex-col gap-1">
               <View className="flex-row items-center justify-between">
                 <Text className="text-[12px] text-on-surface-variant font-medium">Kata Sandi</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => Alert.alert('Lupa Sandi', 'Tautan pemulihan kata sandi telah dikirim ke email terdaftar.')}>
                   <Text className="text-[12px] text-secondary font-medium">Lupa Sandi?</Text>
                 </TouchableOpacity>
               </View>
               <View className="flex-row items-center rounded-xl bg-surface-container-lowest h-12 pl-3 pr-2">
                 <MaterialIcons name="lock" size={18} color="#c2c6d6" />
                 <TextInput 
+                  value={password}
+                  onChangeText={setPassword}
                   className="flex-1 h-full px-2 text-[14px] text-on-surface font-normal"
                   placeholder="••••••••••••"
                   placeholderTextColor="#8c909f"
@@ -167,7 +210,10 @@ export default function LoginScreen() {
 
             {/* Standard Login Submit */}
             <View className="pt-2">
-              <TouchableOpacity className="w-full py-3.5 px-4 rounded-xl bg-surface-container-high flex-row items-center justify-center gap-2 shadow-sm">
+              <TouchableOpacity 
+                onPress={handleLogin}
+                className="w-full py-3.5 px-4 rounded-xl bg-surface-container-high flex-row items-center justify-center gap-2 shadow-sm active:opacity-80"
+              >
                 <MaterialIcons name="login" size={18} color="#adc6ff" />
                 <Text className="text-primary text-[15px] font-semibold">Masuk dengan Akun PayCom</Text>
               </TouchableOpacity>
@@ -190,7 +236,7 @@ export default function LoginScreen() {
 
             <View className="flex-row items-center justify-center gap-1.5">
               <Text className="text-on-surface-variant text-[12px]">Belum punya akun?</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => Alert.alert('Pendaftaran', 'Pendaftaran akun baru terbuka. Silakan hubungi admin laboratorium.')}>
                 <Text className="font-semibold text-primary text-[12px] underline" style={{ textDecorationColor: '#adc6ff80' }}>Daftar Sekarang</Text>
               </TouchableOpacity>
             </View>

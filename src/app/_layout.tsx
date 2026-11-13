@@ -36,6 +36,14 @@ export default function RootLayout() {
               headerShown: false 
             }} 
           />
+          <Stack.Screen 
+            name="login" 
+            options={{ 
+              title: 'Masuk Akun PayCom',
+              presentation: 'modal',
+              headerShown: false 
+            }} 
+          />
         </Stack>
       </BuildProvider>
     </ThemeProvider>

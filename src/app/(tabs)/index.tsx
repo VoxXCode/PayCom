@@ -55,13 +55,13 @@ export default function HomeScreen() {
     setActiveSlotId(slotId);
     setIsModalOpen(true);
     if (slot) {
-      router.setParams({ slot: slot.category });
+      (router as any).setParams({ slot: slot.category });
     }
   };
 
   const handleClosePicker = () => {
     setIsModalOpen(false);
-    router.setParams({ slot: '' });
+    (router as any).setParams({ slot: '' });
   };
 
   const handleSelectComponent = (item: CatalogItem) => {
@@ -104,8 +104,11 @@ export default function HomeScreen() {
               <MaterialIcons name="language" size={16} color="#c2c6d6" />
               <Text className="text-[12px] text-on-surface-variant font-medium">EN</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low">
-              <MaterialIcons name="help-outline" size={20} color="#c2c6d6" />
+            <TouchableOpacity 
+              onPress={() => router.push('/(tabs)/profile')}
+              className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
+            >
+              <MaterialIcons name="person" size={20} color="#c2c6d6" />
             </TouchableOpacity>
           </View>
         </View>
@@ -155,6 +158,29 @@ export default function HomeScreen() {
               </View>
             </View>
           </View>
+        </View>
+
+        {/* Modul 3: Quick Action Banner to Simulasi & External API */}
+        <View className="px-gutter pt-1 pb-1">
+          <TouchableOpacity
+            onPress={() => router.push('/(tabs)/simulation')}
+            className="p-3 rounded-xl bg-secondary/15 border border-secondary/30 flex-row items-center justify-between"
+          >
+            <View className="flex-row items-center gap-2.5 flex-1 pr-2">
+              <View className="w-8 h-8 rounded-lg bg-secondary/20 items-center justify-center">
+                <MaterialIcons name="speed" size={18} color="#4cd7f6" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-[12px] font-bold text-secondary">
+                  Simulasi Benchmark & API Call (Modul 3)
+                </Text>
+                <Text className="text-[11px] text-on-surface-variant">
+                  Uji beban asynchronous, Promise (.then), & fetch External API
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color="#4cd7f6" />
+          </TouchableOpacity>
         </View>
 
         {/* Slot Build Toolbar */}

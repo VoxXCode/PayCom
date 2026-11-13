@@ -1,11 +1,3 @@
-/**
- * Modul 3: Pemrograman Asynchronous & API Call - Lab Informatika UMM
- * File: src/components/ErrorMessage.tsx (Sesuai panduan halaman 21)
- * 
- * Reusable component untuk menampilkan pesan error saat Promise di-reject
- * atau fetching data API mengalami kegagalan, dilengkapi tombol retry.
- */
-
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';

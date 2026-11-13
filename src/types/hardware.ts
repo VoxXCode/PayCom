@@ -1,11 +1,3 @@
-/**
- * Modul 3: Pemrograman Asynchronous & API Call - Lab Informatika UMM
- * File: src/types/hardware.ts
- * 
- * KRITERIA PENILAIAN 1:
- * "Mengambil data dari External API dan memasukkannya ke dalam Object menggunakan Interface."
- */
-
 export interface ExternalProduct {
   id: number;
   title: string;

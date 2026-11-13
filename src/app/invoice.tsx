@@ -23,7 +23,6 @@ export default function InvoiceScreen() {
   const grandTotal = Math.max(0, totalPrice + shippingFee - discount);
 
   const handleClose = () => {
-    // Modul 2 - Penerapan router.canGoBack() & router.back()
     if (router.canGoBack()) {
       router.back();
     } else {
@@ -33,10 +32,8 @@ export default function InvoiceScreen() {
 
   return (
     <View className="flex-1 bg-surface relative" style={{ paddingTop: insets.top }}>
-      {/* Modal Navigation Header */}
       <View className="h-16 px-gutter flex-row items-center justify-between border-b border-surface-variant/30">
         <View className="flex-row items-center gap-2">
-          {/* Tombol Back di Invoice */}
           <TouchableOpacity 
             onPress={handleClose}
             className="h-10 px-3 rounded-xl bg-surface-container-high items-center justify-center flex-row gap-1.5"
@@ -56,7 +53,6 @@ export default function InvoiceScreen() {
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) + 24 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Invoice Summary Card */}
         <View className="p-4 rounded-2xl bg-surface-container-low border border-surface-variant/20 gap-3">
           <View className="flex-row items-center justify-between pb-3 border-b border-surface-variant/30">
             <View>
@@ -71,7 +67,6 @@ export default function InvoiceScreen() {
             </View>
           </View>
 
-          {/* Customer & Rig Info */}
           <View className="flex-row justify-between py-1">
             <View>
               <Text className="text-[11px] text-outline">Penerima:</Text>
@@ -86,7 +81,6 @@ export default function InvoiceScreen() {
           </View>
         </View>
 
-        {/* Itemized Table */}
         <View className="mt-4 rounded-2xl bg-surface-container p-4 gap-3">
           <Text className="text-[14px] font-bold text-on-surface pb-1 border-b border-surface-variant/20">
             Daftar Komponen ({filledCount} Item)
@@ -114,7 +108,6 @@ export default function InvoiceScreen() {
             })
           )}
 
-          {/* Pricing Totals */}
           <View className="gap-2 pt-2">
             <View className="flex-row justify-between">
               <Text className="text-[12px] text-on-surface-variant">Subtotal Komponen</Text>
@@ -146,7 +139,6 @@ export default function InvoiceScreen() {
           </View>
         </View>
 
-        {/* Action Buttons */}
         <View className="mt-5 gap-2.5">
           <TouchableOpacity 
             onPress={handleClose}

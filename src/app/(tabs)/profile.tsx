@@ -20,20 +20,17 @@ export default function ProfileScreen() {
     formatRupiah,
   } = useBuild();
 
-  // State Profil Pengguna
   const [userName, setUserName] = useState<string>('Praktikan UMM Mobile');
   const [userEmail, setUserEmail] = useState<string>('praktikan@paycom.id');
   const [userNim, setUserNim] = useState<string>('202210370311234');
   const [userBio, setUserBio] = useState<string>('PC Enthusiast & Custom Rig Builder');
 
-  // State Form Edit Profil Modal
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editName, setEditName] = useState<string>(userName);
   const [editEmail, setEditEmail] = useState<string>(userEmail);
   const [editNim, setEditNim] = useState<string>(userNim);
   const [editBio, setEditBio] = useState<string>(userBio);
 
-  // State Pengaturan Preferensi
   const [cloudSync, setCloudSync] = useState<boolean>(true);
   const [bottleneckAlert, setBottleneckAlert] = useState<boolean>(true);
   const [promoNotification, setPromoNotification] = useState<boolean>(false);
@@ -111,8 +108,7 @@ export default function ProfileScreen() {
     <View className="flex-1 bg-surface relative">
       <StatusBar style="light" />
 
-      {/* Header */}
-      <View 
+      <View
         className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
         style={{ paddingTop: Math.max(insets.top, 16) }}
       >
@@ -122,9 +118,6 @@ export default function ProfileScreen() {
               <Text className="text-[20px] tracking-tight text-on-surface font-bold">
                 <Text className="text-secondary">Pay</Text>Com
               </Text>
-            </View>
-            <View className="px-2 py-0.5 rounded bg-surface-container-low border border-surface-variant/30">
-              <Text className="text-[11px] text-secondary font-medium">Profil</Text>
             </View>
           </View>
           <View className="flex-row items-center gap-1">
@@ -155,20 +148,16 @@ export default function ProfileScreen() {
       >
         <View className="flex-col w-full px-gutter py-4 gap-4">
           
-          {/* 1. Profile Hero Card */}
           <View className="rounded-2xl p-5 bg-surface-container-high border border-surface-variant/20 shadow-md relative overflow-hidden">
-            {/* Ambient Background Glow */}
             <View className="absolute -top-10 -right-10 w-36 h-36 bg-secondary/15 rounded-full" />
             <View className="absolute -bottom-10 -left-10 w-32 h-32 bg-primary/10 rounded-full" />
 
             <View className="flex-row items-center gap-4 relative z-10">
-              {/* Avatar */}
               <View className="w-18 h-18 rounded-2xl bg-secondary/20 border-2 border-secondary/60 items-center justify-center relative shadow-sm">
                 <MaterialIcons name="person" size={38} color="#4cd7f6" />
                 <View className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-surface-container-high" />
               </View>
 
-              {/* Identity Info */}
               <View className="flex-1">
                 <View className="flex-row items-center gap-2">
                   <Text className="text-[18px] text-on-surface font-bold" numberOfLines={1}>
@@ -189,7 +178,6 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Bio */}
             <View className="mt-4 pt-3 border-t border-surface-variant/30 relative z-10">
               <Text className="text-[12px] text-on-surface-variant italic">
                 "{userBio}"
@@ -197,7 +185,6 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* 2. Live Rig Status Telemetry */}
           <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20">
             <View className="flex-row items-center justify-between pb-3 border-b border-surface-variant/20">
               <View className="flex-row items-center gap-2">
@@ -251,7 +238,6 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Quick Actions for Rig */}
             <View className="flex-row gap-2 pt-3 mt-1">
               <TouchableOpacity 
                 onPress={() => router.push('/invoice')}
@@ -271,11 +257,9 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* 3. Account Preferences */}
           <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20 gap-3">
             <Text className="text-[14px] font-bold text-on-surface">Pengaturan & Preferensi</Text>
             
-            {/* Toggle 1: Cloud Sync */}
             <View className="flex-row items-center justify-between py-1">
               <View className="flex-row items-center gap-3 flex-1 pr-2">
                 <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">
@@ -294,7 +278,6 @@ export default function ProfileScreen() {
               />
             </View>
 
-            {/* Toggle 2: Bottleneck Alert */}
             <View className="flex-row items-center justify-between py-1 border-t border-surface-variant/20">
               <View className="flex-row items-center gap-3 flex-1 pr-2">
                 <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">
@@ -313,7 +296,6 @@ export default function ProfileScreen() {
               />
             </View>
 
-            {/* Toggle 3: Promo & Diskon */}
             <View className="flex-row items-center justify-between py-1 border-t border-surface-variant/20">
               <View className="flex-row items-center gap-3 flex-1 pr-2">
                 <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">
@@ -333,7 +315,6 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* 4. Action Menu */}
           <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20 gap-2">
             <Text className="text-[14px] font-bold text-on-surface mb-1">Aksi Akun</Text>
 
@@ -374,7 +355,6 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      {/* Edit Profile Modal */}
       <Modal
         visible={isEditModalOpen}
         animationType="slide"

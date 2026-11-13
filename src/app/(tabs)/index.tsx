@@ -25,17 +25,14 @@ export default function HomeScreen() {
     formatRupiah
   } = useBuild();
 
-  // Penerapan useState sesuai Modul 2
   const [activeSlotId, setActiveSlotId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [statusNotification, setStatusNotification] = useState<string>('Mulai rakit PC dengan memilih komponen.');
 
-  // Penerapan useEffect (Pola 1 - Initial Mount / Render Pertama Kali)
   useEffect(() => {
     console.log('[Modul 2] HomeScreen dimuat untuk pertama kali.');
   }, []);
 
-  // Penerapan useEffect (Pola 2 - Reaktif saat dependency state/data berubah)
   useEffect(() => {
     if (filledCount === 0) {
       setStatusNotification('Mulai rakit PC dengan memilih komponen pertama Anda.');
@@ -49,7 +46,6 @@ export default function HomeScreen() {
   const activeSlot = slots.find(s => s.id === activeSlotId);
   const availableItems = activeSlot ? CATALOG[activeSlot.category] || [] : [];
 
-  // Modul 2 - Penerapan router.setParams() untuk mengupdate parameter URL route aktif (Halaman 38)
   const handleOpenPicker = (slotId: string) => {
     const slot = slots.find(s => s.id === slotId);
     setActiveSlotId(slotId);
@@ -86,8 +82,7 @@ export default function HomeScreen() {
     <View className="flex-1 bg-surface relative">
       <StatusBar style="light" />
       
-      {/* Header */}
-      <View 
+      <View
         className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
         style={{ paddingTop: Math.max(insets.top, 16) }}
       >
@@ -119,7 +114,6 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingTop: Math.max(insets.top, 16) + 64, paddingBottom: 32 + 64 + Math.max(insets.bottom, 16) }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Status Validation Telemetry Strip */}
         <View className="px-gutter pt-3 pb-2">
           <View className="bg-surface-container-low rounded-xl p-3 shadow-sm">
             <View className="flex-row items-center justify-between mb-2">
@@ -160,7 +154,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Modul 3: Quick Action Banner to Simulasi & External API */}
         <View className="px-gutter pt-1 pb-1">
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/simulation')}
@@ -171,9 +164,6 @@ export default function HomeScreen() {
                 <MaterialIcons name="speed" size={18} color="#4cd7f6" />
               </View>
               <View className="flex-1">
-                <Text className="text-[12px] font-bold text-secondary">
-                  Simulasi Benchmark & API Call (Modul 3)
-                </Text>
                 <Text className="text-[11px] text-on-surface-variant">
                   Uji beban asynchronous, Promise (.then), & fetch External API
                 </Text>
@@ -183,7 +173,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Slot Build Toolbar */}
         <View className="px-gutter flex-row items-center justify-between pt-2 pb-1">
           <View className="flex-row items-center gap-2">
             <Text className="text-[14px] text-on-surface font-semibold">Slot Komponen Rakitan</Text>
@@ -204,7 +193,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Status Notification (Reaktif dari useEffect) */}
         <View className="px-gutter pt-1 pb-1">
           <View className="flex-row items-center gap-2 px-3 py-2 rounded-xl bg-surface-container-low/70 border border-surface-variant/30">
             <MaterialIcons name="info-outline" size={16} color="#4cd7f6" />
@@ -212,7 +200,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Component Slots List */}
         <View className="px-gutter flex-col gap-3 pt-2">
           {slots.map((slot) => {
             const isFilled = slot.selectedItem !== null;
@@ -293,7 +280,6 @@ export default function HomeScreen() {
             );
           })}
 
-          {/* Bottom Summary Banner */}
           {filledCount > 0 && (
             <View className="rounded-xl bg-surface-container-low p-3.5 mt-2 flex-row items-center justify-between">
               <View className="flex-col">
@@ -312,7 +298,6 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      {/* Component Picker Bottom Sheet Modal */}
       <Modal
         visible={isModalOpen}
         transparent={true}
@@ -327,10 +312,8 @@ export default function HomeScreen() {
             className="bg-surface-container rounded-t-3xl max-h-[75%] w-full overflow-hidden"
             onPress={(e) => e.stopPropagation()}
           >
-            {/* Modal Handle */}
             <View className="w-10 h-1 bg-outline-variant/40 rounded-full self-center my-2.5" />
             
-            {/* Modal Header */}
             <View className="px-gutter pb-3 pt-1 border-b border-surface-variant/20 flex-row items-center justify-between">
               <View className="flex-col">
                 <Text className="text-[16px] font-bold text-on-surface">
@@ -348,7 +331,6 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Modal Items List */}
             <ScrollView 
               className="px-gutter py-3"
               contentContainerStyle={{ gap: 10, paddingBottom: Math.max(insets.bottom, 20) + 16 }}

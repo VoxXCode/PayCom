@@ -15,7 +15,6 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     if (!email.trim() && !password.trim()) {
-      // Default quick demo login
       Alert.alert('🎉 Berhasil Masuk', 'Selamat datang kembali di PayCom Studio!', [
         {
           text: 'Lanjut ke Profil',
@@ -49,7 +48,6 @@ export default function LoginScreen() {
     <View className="flex-1 bg-surface">
       <StatusBar style="light" />
       
-      {/* Header */}
       <View 
         className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
         style={{ paddingTop: Math.max(insets.top, 16) }}
@@ -93,11 +91,9 @@ export default function LoginScreen() {
       >
         <View className="flex-col w-full px-gutter py-4 gap-6 relative overflow-hidden">
           
-          {/* Dynamic Ambient Glow */}
           <View className="absolute -top-12 -left-16 w-64 h-64 bg-primary/10 rounded-full" />
           <View className="absolute top-48 -right-16 w-56 h-56 bg-secondary/10 rounded-full" />
 
-          {/* 1. Header / Brand Intro */}
           <View className="flex-col gap-2 relative z-10">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-lowest">
@@ -111,7 +107,6 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          {/* 2. Primary Hero Feature: Guest Mode */}
           <View className="relative z-10">
             <View className="rounded-xl p-4 bg-surface-container-high shadow-md overflow-hidden flex-col gap-2 relative">
               <View className="absolute -right-8 -bottom-8 w-32 h-32 bg-secondary/15 rounded-full" />
@@ -138,7 +133,6 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          {/* 3. Divider */}
           <View className="flex-row items-center justify-center py-1 relative">
             <View className="w-full h-[1px] bg-surface-container-highest" />
             <View className="absolute px-3 bg-surface">
@@ -146,9 +140,7 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          {/* 4. Account Login Form */}
           <View className="flex-col gap-4 relative z-10">
-            {/* Input: Email / ID */}
             <View className="flex-col gap-1">
               <View className="flex-row items-center justify-between">
                 <Text className="text-[12px] text-on-surface-variant font-medium">PayCom ID / Email</Text>
@@ -167,7 +159,6 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Input: Password */}
             <View className="flex-col gap-1">
               <View className="flex-row items-center justify-between">
                 <Text className="text-[12px] text-on-surface-variant font-medium">Kata Sandi</Text>
@@ -195,7 +186,6 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Remember Me Switch */}
             <View className="flex-row items-center justify-between pt-1">
               <TouchableOpacity 
                 className="flex-row items-center gap-2"
@@ -209,7 +199,6 @@ export default function LoginScreen() {
               <Text className="text-[11px] text-outline font-medium">Sesi 30 Hari</Text>
             </View>
 
-            {/* Standard Login Submit */}
             <View className="pt-2">
               <TouchableOpacity 
                 onPress={handleLogin}
@@ -221,7 +210,6 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          {/* 6. Footer Notes & Perks */}
           <View className="flex-col gap-4 pt-2 relative z-10">
             <View className="p-3.5 rounded-xl bg-surface-container-low flex-row items-start gap-2.5 shadow-sm">
               <View className="w-7 h-7 rounded-lg bg-surface-container-high items-center justify-center shrink-0 mt-0.5">

@@ -22,18 +22,15 @@ export default function SummaryScreen() {
     formatRupiah
   } = useBuild();
 
-  // Penerapan useState sesuai Modul 2
   const [shippingOption, setShippingOption] = useState<'reguler' | 'express'>('reguler');
   const [paymentMethod, setPaymentMethod] = useState<'qris' | 'va' | 'transfer'>('qris');
   const [estimatedDelivery, setEstimatedDelivery] = useState<string>('2 - 3 Hari Kerja');
   const [orderValidationMessage, setOrderValidationMessage] = useState<string>('');
 
-  // Penerapan useEffect (Pola 1 - Initial Mount / Render Pertama Kali)
   useEffect(() => {
     console.log('[Modul 2] SummaryScreen dimuat untuk pertama kali.');
   }, []);
 
-  // Penerapan useEffect (Pola 2 - Reaktif saat state shippingOption atau filledCount berubah)
   useEffect(() => {
     if (filledCount === 0) {
       setEstimatedDelivery('Menunggu pemilihan komponen');
@@ -52,7 +49,6 @@ export default function SummaryScreen() {
   const grandTotal = Math.max(0, totalPrice + shippingFee - discount);
   const totalSavings = 250000 + discount;
 
-  // Modul 2 - Penerapan router.setParams() untuk mengubah parameter URL route aktif tanpa reload (Halaman 38)
   const handleSelectShipping = (option: 'reguler' | 'express') => {
     setShippingOption(option);
     (router as any).setParams({ shipping: option });
@@ -64,7 +60,6 @@ export default function SummaryScreen() {
         'Belum Ada Komponen',
         'Silakan pilih komponen terlebih dahulu di halaman Komponen sebelum melanjutkan.',
         [
-          // Modul 2 - Penerapan router.push() untuk navigasi ke halaman komponen
           { text: 'Pilih Komponen', onPress: () => router.push('/(tabs)') },
           { text: 'Batal', style: 'cancel' }
         ]
@@ -80,7 +75,6 @@ export default function SummaryScreen() {
           text: 'Mulai Rakitan Baru',
           onPress: () => {
             resetSlots();
-            // Modul 2 - Penerapan router.replace() untuk menghapus stack setelah checkout (Halaman 33)
             router.replace('/(tabs)');
           }
         },
@@ -98,7 +92,6 @@ export default function SummaryScreen() {
       Alert.alert('Rakitan Kosong', 'Pilih komponen terlebih dahulu untuk melihat invoice.');
       return;
     }
-    // Modul 2 - Navigasi membuka modal Stack.Screen (Halaman 35)
     router.push('/invoice');
   };
 
@@ -123,7 +116,6 @@ export default function SummaryScreen() {
 
   return (
     <View className="flex-1 bg-surface relative">
-      {/* Header */}
       <View 
         className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
         style={{ paddingTop: Math.max(insets.top, 16) }}
@@ -161,7 +153,6 @@ export default function SummaryScreen() {
       >
         <View className="flex-col w-full px-gutter pt-2 pb-6 space-y-4 gap-4">
           
-          {/* Status Validation Telemetry Strip (Kalkulasi Rig) */}
           <View className="bg-surface-container-low rounded-xl p-3 shadow-sm">
             <View className="flex-row items-center justify-between mb-2">
               <View className="flex-row items-center gap-1.5">
@@ -199,20 +190,17 @@ export default function SummaryScreen() {
               </View>
             </View>
 
-            {/* Shortcut ke Tab Simulasi Modul 3 */}
             <TouchableOpacity 
               onPress={() => router.push('/(tabs)/simulation')}
               className="mt-2 py-2 px-2.5 rounded-lg bg-surface-container flex-row items-center justify-between"
             >
               <View className="flex-row items-center gap-2">
                 <MaterialIcons name="speed" size={16} color="#4cd7f6" />
-                <Text className="text-[12px] text-secondary font-medium">Uji Benchmark Rig di Simulasi (Modul 3)</Text>
               </View>
               <MaterialIcons name="chevron-right" size={14} color="#4cd7f6" />
             </TouchableOpacity>
           </View>
 
-          {/* Quick Hardware Visual Strip */}
           <View className="flex-col gap-2 mt-2">
             <View className="flex-row items-center justify-between">
               <Text className="text-[12px] text-outline font-medium">
@@ -259,7 +247,6 @@ export default function SummaryScreen() {
             )}
           </View>
 
-          {/* Opsi Pengiriman & Pembayaran (Penerapan useState & useEffect) */}
           <View className="rounded-xl bg-surface-container p-4 shadow-sm flex-col gap-3 mt-1">
             <View className="flex-row items-center justify-between pb-1 border-b border-surface-variant/30">
               <View className="flex-row items-center gap-2">
@@ -268,7 +255,6 @@ export default function SummaryScreen() {
               </View>
             </View>
 
-            {/* Pilihan Metode Pengiriman */}
             <View className="flex-col gap-1.5">
               <Text className="text-[12px] text-outline font-medium">Metode Pengiriman:</Text>
               <View className="flex-row gap-2">
@@ -293,7 +279,6 @@ export default function SummaryScreen() {
               </View>
             </View>
 
-            {/* Pilihan Metode Pembayaran */}
             <View className="flex-col gap-1.5 mt-1">
               <Text className="text-[12px] text-outline font-medium">Metode Pembayaran:</Text>
               <View className="flex-row gap-2">
@@ -315,7 +300,6 @@ export default function SummaryScreen() {
               </View>
             </View>
 
-            {/* Estimasi Pengiriman Reaktif (dari useEffect) */}
             <View className="p-2.5 rounded-lg bg-surface-container-low flex-row items-center gap-2 mt-1">
               <MaterialIcons name="schedule" size={16} color="#4cd7f6" />
               <View className="flex-1">
@@ -325,7 +309,6 @@ export default function SummaryScreen() {
             </View>
           </View>
 
-          {/* Price Breakdown Card */}
           <View className="rounded-xl bg-surface-container p-4 shadow-sm flex-col space-y-3 mt-2 gap-3">
             <View className="flex-row items-center justify-between pb-2 border-b border-surface-variant/30">
               <View className="flex-row items-center gap-2">
@@ -337,7 +320,6 @@ export default function SummaryScreen() {
               </View>
             </View>
 
-            {/* Line Items */}
             <View className="flex-col gap-2.5 pt-1">
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
@@ -414,7 +396,6 @@ export default function SummaryScreen() {
               </View>
             </View>
 
-            {/* Grand Total Section Highlight */}
             <View className="mt-2 bg-surface-container-highest/60 p-4 rounded-b-xl flex-row items-center justify-between" style={{ marginHorizontal: -16, marginBottom: -16 }}>
               <View className="flex-col">
                 <Text className="text-[12px] text-outline font-medium">Total Pembayaran</Text>
@@ -433,7 +414,6 @@ export default function SummaryScreen() {
             </View>
           </View>
 
-          {/* Trust & Protection Badges */}
           <View className="rounded-xl bg-surface-container-low p-4 shadow-sm flex-col gap-3 mt-2">
             <Text className="text-[12px] text-outline font-semibold">Standar Perakitan Studio PayCom</Text>
             <View className="flex-col gap-2.5">
@@ -467,7 +447,6 @@ export default function SummaryScreen() {
             </View>
           </View>
 
-          {/* Secondary Workflow Buttons */}
           <View className="flex-col gap-2.5 pt-1 mt-2">
             <View className="flex-row gap-2">
               <TouchableOpacity className="flex-1 py-3 px-3 rounded-xl bg-surface-container flex-row items-center justify-center gap-1.5" onPress={handleChat}>
@@ -488,7 +467,6 @@ export default function SummaryScreen() {
         </View>
       </ScrollView>
 
-      {/* Sticky Bottom Checkout Bar: Total Estimasi Rakitan */}
       <View 
         className="absolute left-4 right-4 z-40 bg-surface-container-lowest/95 rounded-2xl p-3.5 flex-col gap-2.5 shadow-md"
         style={{ bottom: Math.max(insets.bottom, 16) + 64 + 16 }}
@@ -512,7 +490,6 @@ export default function SummaryScreen() {
           </TouchableOpacity>
         </View>
         
-        {/* Main Action */}
         <View className="flex-row gap-2">
           <TouchableOpacity 
             className="flex-2 flex-row items-center justify-center gap-1.5 py-3 px-2 rounded-xl bg-surface-container-high"

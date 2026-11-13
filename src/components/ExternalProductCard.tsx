@@ -1,11 +1,3 @@
-/**
- * Modul 3: Pemrograman Asynchronous & API Call - Lab Informatika UMM
- * File: src/components/ExternalProductCard.tsx
- * 
- * Menampilkan item produk yang diambil dari External API
- * dan dipetakan ke dalam TypeScript Interface `ExternalProduct`.
- */
-
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -17,7 +9,6 @@ interface ExternalProductCardProps {
 }
 
 export default function ExternalProductCard({ product, onPress }: ExternalProductCardProps) {
-  // Konversi kurs estimasi USD ke IDR
   const priceIdr = Math.round(product.price * 16000);
   const formattedIdr = new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -31,7 +22,6 @@ export default function ExternalProductCard({ product, onPress }: ExternalProduc
       onPress={onPress}
       className="p-3 rounded-2xl bg-surface-container border border-surface-variant/20 mb-3 flex-row gap-3 shadow-sm"
     >
-      {/* Product Image */}
       <View className="w-20 h-20 rounded-xl bg-surface-container-low overflow-hidden items-center justify-center border border-surface-variant/30">
         {product.thumbnail ? (
           <Image
@@ -44,7 +34,6 @@ export default function ExternalProductCard({ product, onPress }: ExternalProduc
         )}
       </View>
 
-      {/* Product Details */}
       <View className="flex-1 justify-between">
         <View>
           <View className="flex-row items-center justify-between gap-1">

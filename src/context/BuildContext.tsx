@@ -176,7 +176,6 @@ type BuildContextType = {
 const BuildContext = createContext<BuildContextType | null>(null);
 
 export function BuildProvider({ children }: { children: React.ReactNode }) {
-  // Penggunaan useState sesuai Modul 2
   const [slots, setSlots] = useState<BuildSlot[]>(DEFAULT_SLOTS);
   const [voucherApplied, setVoucherApplied] = useState<boolean>(true);
   const [totalWattage, setTotalWattage] = useState<number>(0);
@@ -187,7 +186,6 @@ export function BuildProvider({ children }: { children: React.ReactNode }) {
   const filledCount = filledSlots.length;
   const totalPrice = slots.reduce((sum, s) => sum + (s.selectedItem?.price || 0), 0);
 
-  // Penggunaan useEffect: Dijalankan setiap kali state 'slots' berubah
   useEffect(() => {
     const computedWattage = slots.reduce((sum, s) => sum + (s.selectedItem?.wattage || 0), 0) + (filledSlots.length > 0 ? 50 : 0);
     const computedCapacity = Math.min(Math.round((computedWattage / 750) * 100), 100);
@@ -205,7 +203,6 @@ export function BuildProvider({ children }: { children: React.ReactNode }) {
     setBottleneckText(computedBottleneck);
   }, [slots]);
 
-  // Penggunaan useEffect: Initial mount effect (sekali saat aplikasi dimuat)
   useEffect(() => {
     console.log('[BuildContext] Sistem Rakitan PayCom terinisialisasi.');
   }, []);

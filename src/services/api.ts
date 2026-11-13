@@ -1,17 +1,7 @@
-/**
- * Modul 3: Pemrograman Asynchronous & API Call - Lab Informatika UMM
- * File: src/services/api.ts (Sesuai panduan bab 2 & bab 3)
- * 
- * Konfigurasi HTTP Client dasar untuk API Calls.
- */
-
 import { ApiResponse } from '../types/api';
 
 export const API_BASE_URL = 'https://dummyjson.com';
 
-/**
- * Pre-built Async Function untuk melakukan HTTP GET request dengan generic type
- */
 export async function getRequest<T>(endpoint: string): Promise<ApiResponse<T>> {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

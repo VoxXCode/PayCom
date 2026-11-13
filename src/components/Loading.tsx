@@ -1,10 +1,3 @@
-/**
- * Modul 3: Pemrograman Asynchronous & API Call - Lab Informatika UMM
- * File: src/components/Loading.tsx (Sesuai panduan halaman 21)
- * 
- * Reusable component untuk menampilkan status loading / fetching data asynchronous.
- */
-
 import React from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 

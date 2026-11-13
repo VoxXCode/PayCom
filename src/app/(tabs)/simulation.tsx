@@ -1,13 +1,3 @@
-/**
- * Modul 3: Pemrograman Asynchronous & API Call - Lab Informatika UMM
- * File: src/app/(tabs)/simulation.tsx
- * 
- * Implementasi Tugas Pekan Demo Modul 3 pada Tab Simulasi:
- * 1. Mengambil data dari External API & dipetakan ke Interface ExternalProduct
- * 2. Menggunakan Custom Async Function (delay, runBenchmarkStage) & Pre-built Async Function (fetch, await)
- * 3. Menggunakan fungsi .then(), .resolve(), dan .reject() secara eksplisit
- */
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,33 +30,25 @@ export default function SimulationScreen() {
     formatRupiah,
   } = useBuild();
 
-  // State untuk External API Call (Kriteria 1)
   const [externalProducts, setExternalProducts] = useState<ExternalProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('laptops');
   const [isLoadingApi, setIsLoadingApi] = useState<boolean>(true);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // State untuk Simulasi Asynchronous & Benchmark (Kriteria 2 & 3)
   const [isBenchmarking, setIsBenchmarking] = useState<boolean>(false);
   const [benchmarkProgressText, setBenchmarkProgressText] = useState<string>('Siap menjalankan simulasi rakitan.');
   const [benchmarkReport, setBenchmarkReport] = useState<RigBenchmarkReport | null>(null);
   const [benchmarkError, setBenchmarkError] = useState<string | null>(null);
 
-  // 1. Initial Load: Mengambil data External API saat halaman pertama kali dimuat
   useEffect(() => {
     loadExternalApiData(selectedCategory);
   }, [selectedCategory]);
 
-  /**
-   * Mengambil data dari External API menggunakan Custom Async Function & Pre-built fetch()
-   * Kriteria Penilaian 1 & 2
-   */
   const loadExternalApiData = async (cat: string) => {
     setIsLoadingApi(true);
     setApiError(null);
 
     try {
-      // Pemanggilan Custom Async Function yang membungkus pre-built fetch()
       const products: ExternalProduct[] = await fetchExternalProducts(cat);
       setExternalProducts(products);
     } catch (err: any) {
@@ -76,22 +58,15 @@ export default function SimulationScreen() {
     }
   };
 
-  /**
-   * Demonstrasi pemanggilan API menggunakan .then() dan .catch()
-   * Kriteria Penilaian 3
-   */
   const handleReloadWithPromise = () => {
     setIsLoadingApi(true);
     setApiError(null);
 
-    // Memanfaatkan fungsi fetchHardwareWithPromise yang mengembalikan Promise<ExternalProduct[]>
     fetchHardwareWithPromise(selectedCategory)
-      // Penggunaan method .then()
       .then((items: ExternalProduct[]) => {
         setExternalProducts(items);
         Alert.alert('Sukses (.then)', `Berhasil mengambil ${items.length} data produk via Promise chaining .then()!`);
       })
-      // Penanganan error reject() melalui .catch()
       .catch((err: any) => {
         setApiError(err?.message || 'Error tertangkap pada .catch() Promise.');
       })
@@ -100,10 +75,6 @@ export default function SimulationScreen() {
       });
   };
 
-  /**
-   * Menjalankan Pipeline Simulasi Benchmark Asynchronous
-   * Menerapkan Kriteria 2 (Custom Async Function) & Kriteria 3 (.then(), .resolve(), .reject())
-   */
   const handleStartBenchmark = () => {
     if (filledCount === 0) {
       Alert.alert(
@@ -121,21 +92,18 @@ export default function SimulationScreen() {
     setBenchmarkError(null);
     setBenchmarkReport(null);
 
-    // Memanggil pipeline pengujian multi-tahap yang disusun dengan chained .then()
     runFullBenchmarkChained(
       totalWattage,
       filledCount,
-      750, // Kapasitas default PSU PayCom
+      750,
       (stageNumber, stageName) => {
         setBenchmarkProgressText(stageName);
       }
     )
-      // Penggunaan .then() saat seluruh rantai Promise selesai (resolve)
       .then((report: RigBenchmarkReport) => {
         setBenchmarkReport(report);
         setBenchmarkProgressText('✅ Simulasi benchmark selesai!');
       })
-      // Penanganan ketika Promise mengalami kegagalan (reject)
       .catch((err: any) => {
         setBenchmarkError(err?.message || 'Simulasi pengujian dihentikan.');
         setBenchmarkProgressText('❌ Pengujian gagal.');
@@ -145,21 +113,15 @@ export default function SimulationScreen() {
       });
   };
 
-  /**
-   * Demonstrasi khusus pemanggilan reject() untuk asisten praktikum:
-   * Menguji validasi daya melebihi batas PSU (overload)
-   */
   const handleTestRejectCondition = () => {
     setIsBenchmarking(true);
     setBenchmarkError(null);
 
-    // Memanggil validatePowerSafetyWithPromise dengan beban simulasi 1100W pada PSU 750W
     validatePowerSafetyWithPromise(1100, 750)
       .then((msg) => {
         Alert.alert('Hasil .resolve()', msg);
       })
       .catch((err: any) => {
-        // reject() tertangkap di sini
         setBenchmarkError(`[Demo .reject()] ${err.message}`);
         Alert.alert('Demonstrasi .reject()', `Fungsi reject() berhasil dipicu:\n\n${err.message}`);
       })
@@ -172,7 +134,6 @@ export default function SimulationScreen() {
     <View className="flex-1 bg-surface relative">
       <StatusBar style="light" />
 
-      {/* Header */}
       <View 
         className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
         style={{ paddingTop: Math.max(insets.top, 16) }}
@@ -183,9 +144,6 @@ export default function SimulationScreen() {
               <Text className="text-[20px] tracking-tight text-on-surface font-bold">
                 <Text className="text-secondary">Pay</Text>Com
               </Text>
-            </View>
-            <View className="px-2 py-0.5 rounded bg-surface-container-low border border-secondary/30">
-              <Text className="text-[11px] text-secondary font-semibold">Simulasi Modul 3</Text>
             </View>
           </View>
 
@@ -208,17 +166,12 @@ export default function SimulationScreen() {
       >
         <View className="flex-col w-full px-gutter py-4 gap-5">
 
-          {/* 1. Modul 3 Mission Banner */}
           <View className="rounded-2xl p-4 bg-surface-container-high border border-surface-variant/20 shadow-md relative overflow-hidden">
             <View className="absolute -top-12 -right-12 w-32 h-32 bg-secondary/15 rounded-full" />
 
             <View className="flex-row items-start justify-between">
               <View className="flex-1 pr-2">
                 <View className="flex-row items-center gap-1.5">
-                  <View className="w-2 h-2 rounded-full bg-secondary" />
-                  <Text className="text-[11px] text-secondary font-semibold uppercase tracking-wider">
-                    Pekan Demo • Modul 3
-                  </Text>
                 </View>
                 <Text className="text-[17px] text-on-surface font-bold mt-1">
                   Simulasi Asynchronous & API
@@ -233,7 +186,6 @@ export default function SimulationScreen() {
             </View>
           </View>
 
-          {/* 2. Live Hardware Rig Telemetry */}
           <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20">
             <View className="flex-row items-center justify-between pb-3 border-b border-surface-variant/20">
               <View className="flex-row items-center gap-2">
@@ -260,7 +212,6 @@ export default function SimulationScreen() {
               </View>
             </View>
 
-            {/* Interactive Benchmark Controller */}
             <View className="mt-4 pt-3 border-t border-surface-variant/20 gap-2.5">
               <View className="p-3 rounded-xl bg-surface-container-high border border-surface-variant/30 flex-row items-center gap-3">
                 {isBenchmarking ? (
@@ -274,7 +225,6 @@ export default function SimulationScreen() {
               </View>
 
               <View className="flex-row gap-2 pt-1">
-                {/* Main Benchmark Button (.then() chain) */}
                 <TouchableOpacity
                   disabled={isBenchmarking}
                   onPress={handleStartBenchmark}
@@ -288,7 +238,6 @@ export default function SimulationScreen() {
                   </Text>
                 </TouchableOpacity>
 
-                {/* Reject Demo Button */}
                 <TouchableOpacity
                   disabled={isBenchmarking}
                   onPress={handleTestRejectCondition}
@@ -299,7 +248,6 @@ export default function SimulationScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Error Box if reject() triggered */}
               {benchmarkError && (
                 <ErrorMessage
                   message={benchmarkError}
@@ -307,7 +255,6 @@ export default function SimulationScreen() {
                 />
               )}
 
-              {/* Benchmark Result Card */}
               {benchmarkReport && (
                 <View className="mt-2 p-4 rounded-2xl bg-secondary/10 border border-secondary/30 gap-2.5">
                   <View className="flex-row items-center justify-between">
@@ -351,7 +298,6 @@ export default function SimulationScreen() {
             </View>
           </View>
 
-          {/* 3. External API Catalog Section (Kriteria 1 & 2) */}
           <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20 gap-3">
             <View className="flex-row items-center justify-between">
               <View>
@@ -359,12 +305,8 @@ export default function SimulationScreen() {
                   <MaterialIcons name="cloud" size={16} color="#4cd7f6" />
                   <Text className="text-[14px] font-bold text-on-surface">Katalog External API</Text>
                 </View>
-                <Text className="text-[11px] text-outline mt-0.5">
-                  Sumber: https://dummyjson.com/products (Mapped ke Interface)
-                </Text>
               </View>
 
-              {/* Reload via .then() button */}
               <TouchableOpacity
                 onPress={handleReloadWithPromise}
                 className="px-2.5 py-1.5 rounded-xl bg-surface-container-high border border-surface-variant/30 flex-row items-center gap-1"
@@ -374,7 +316,6 @@ export default function SimulationScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Category Filter Buttons */}
             <View className="flex-row gap-2 pt-1">
               {[
                 { label: 'Laptops', key: 'laptops' },
@@ -401,7 +342,6 @@ export default function SimulationScreen() {
               ))}
             </View>
 
-            {/* Content: Loading, Error, or Products List */}
             {isLoadingApi ? (
               <Loading message={`Mengambil data kategori "${selectedCategory}" dari DummyJSON API...`} />
             ) : apiError ? (

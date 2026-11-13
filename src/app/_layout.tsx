@@ -14,7 +14,6 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <BuildProvider>
         <AnimatedSplashOverlay />
-        {/* Modul 2 - Menerapkan _layout.tsx dan <Stack.Screen> (Halaman 30-31, 35, 40) */}
         <Stack
           screenOptions={{
             headerShown: false,

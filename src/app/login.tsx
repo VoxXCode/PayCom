@@ -1,78 +1,140 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [builderName, setBuilderName] = useState('');
+  const [nim, setNim] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberDevice, setRememberDevice] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleLogin = () => {
-    if (!email.trim() && !password.trim()) {
-      Alert.alert('🎉 Berhasil Masuk', 'Selamat datang kembali di PayCom Studio!', [
-        {
-          text: 'Lanjut ke Profil',
-          onPress: () => router.replace('/(tabs)/profile'),
-        },
-      ]);
+  const handleAuth = async () => {
+    if (isSubmitting) return;
+
+    const cleanEmail = email.trim();
+    const cleanName = builderName.trim();
+    const cleanNim = nim.trim();
+
+    setErrorMessage(null);
+
+    if (!isSupabaseConfigured) {
+      setErrorMessage(
+        'Konfigurasi Supabase belum diisi. Silakan lengkapi EXPO_PUBLIC_SUPABASE_URL dan EXPO_PUBLIC_SUPABASE_ANON_KEY di file .env terlebih dahulu.'
+      );
       return;
     }
 
-    Alert.alert('🎉 Berhasil Masuk', `Selamat datang kembali, ${email || 'Builder'}!`, [
-      {
-        text: 'Buka Profil',
-        onPress: () => router.replace('/(tabs)/profile'),
-      },
-      {
-        text: 'Mulai Rakit',
-        onPress: () => router.replace('/(tabs)'),
-      },
-    ]);
+    if (!cleanEmail || !password) {
+      setErrorMessage('Email dan kata sandi wajib diisi.');
+      return;
+    }
+
+    if (isRegistering && !cleanName) {
+      setErrorMessage('Nama builder wajib diisi saat mendaftar.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('Kata sandi minimal 6 karakter.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      if (isRegistering) {
+        const { data, error } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: {
+            data: {
+              full_name: cleanName,
+              nim: cleanNim || '-',
+              role: 'builder',
+            },
+          },
+        });
+
+        if (error) {
+          setErrorMessage(error.message);
+          return;
+        }
+
+        if (data.session) {
+          Alert.alert('Pendaftaran Berhasil', `Selamat datang di PayCom Studio, ${cleanName}!`);
+        } else {
+          Alert.alert(
+            'Akun Terdaftar',
+            'Akun berhasil dibuat. Jika konfirmasi email aktif di Supabase, cek inbox atau langsung masuk jika sudah dinonaktifkan.'
+          );
+          setIsRegistering(false);
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
+
+        if (error) {
+          setErrorMessage(error.message);
+          return;
+        }
+      }
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Terjadi kesalahan koneksi saat menghubungi server.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/(tabs)');
-    }
+  const toggleMode = () => {
+    setErrorMessage(null);
+    setIsRegistering((prev) => !prev);
   };
 
   return (
     <View className="flex-1 bg-surface">
       <StatusBar style="light" />
-      
-      <View 
+
+      <View
         className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
         style={{ paddingTop: Math.max(insets.top, 16) }}
       >
         <View className="h-16 px-gutter flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <TouchableOpacity 
-              onPress={handleBack}
-              className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
-            >
-              <MaterialIcons name="arrow-back" size={20} color="#c2c6d6" />
-            </TouchableOpacity>
-            <View className="flex-row items-center gap-1">
-              <Text className="text-[20px] tracking-tight text-on-surface font-bold">
-                <Text className="text-secondary">Pay</Text>Com
-              </Text>
-            </View>
+            <Text className="text-[20px] tracking-tight text-on-surface font-bold">
+              <Text className="text-secondary">Pay</Text>Com
+            </Text>
           </View>
-          <View className="flex-row items-center gap-1">
-            <TouchableOpacity className="h-10 px-3 flex-row items-center gap-1.5 rounded-xl bg-surface-container-low">
-              <MaterialIcons name="language" size={16} color="#c2c6d6" />
-              <Text className="text-[12px] text-on-surface-variant font-medium">EN</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={() => Alert.alert('Bantuan Login', 'Gunakan akun PayCom Anda atau masuk sebagai Tamu untuk langsung mulai merakit PC.')}
+          <View className="flex-row items-center gap-1.5">
+            <View className="h-8 px-2.5 flex-row items-center gap-1 rounded-lg bg-surface-container-low">
+              <MaterialIcons name="lock-outline" size={14} color="#4cd7f6" />
+              <Text className="text-[11px] text-secondary font-medium">SecureStore</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert(
+                  'Bantuan Autentikasi',
+                  'Masuk atau daftar akun PayCom untuk menyimpan rakitan PC ke cloud Supabase dengan keamanan terenkripsi.'
+                )
+              }
               className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
             >
               <MaterialIcons name="help-outline" size={20} color="#c2c6d6" />
@@ -81,161 +143,216 @@ export default function LoginScreen() {
         </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         className="flex-1 w-full bg-surface"
-        contentContainerStyle={{ 
-          paddingTop: Math.max(insets.top, 16) + 64, 
-          paddingBottom: Math.max(insets.bottom, 24)
+        contentContainerStyle={{
+          paddingTop: Math.max(insets.top, 16) + 64,
+          paddingBottom: Math.max(insets.bottom, 24),
         }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-col w-full px-gutter py-4 gap-6 relative overflow-hidden">
-          
+        <View className="flex-col w-full px-gutter py-4 gap-5 relative overflow-hidden">
           <View className="absolute -top-12 -left-16 w-64 h-64 bg-primary/10 rounded-full" />
           <View className="absolute top-48 -right-16 w-56 h-56 bg-secondary/10 rounded-full" />
 
           <View className="flex-col gap-2 relative z-10">
             <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-lowest">
+              <View className="flex-row items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-lowest">
                 <View className="w-1.5 h-1.5 rounded-full bg-secondary" />
-                <Text className="text-[11px] text-on-surface-variant font-medium leading-none">v1.0 • PayCom</Text>
+                <Text className="text-[11px] text-on-surface-variant font-medium leading-none">
+                  Supabase Auth • JWT Session
+                </Text>
               </View>
             </View>
             <View className="pt-1 flex-col">
-              <Text className="text-[22px] text-on-surface tracking-tight font-bold">Akses Studio Rakitan</Text>
-              <Text className="text-[13px] text-on-surface-variant pt-1 leading-relaxed">Mulai rancang PC impianmu dengan validasi hardware cerdas dan simulasi kompatibilitas real-time.</Text>
+              <Text className="text-[22px] text-on-surface tracking-tight font-bold">
+                {isRegistering ? 'Daftar Akun Builder' : 'Masuk ke Studio PayCom'}
+              </Text>
+              <Text className="text-[13px] text-on-surface-variant pt-1 leading-relaxed">
+                {isRegistering
+                  ? 'Buat akun baru untuk menyimpan draft rakitan PC secara aman ke database cloud.'
+                  : 'Autentikasi akun PayCom untuk mengakses komponen, simulasi benchmark, dan draft cloud.'}
+              </Text>
             </View>
           </View>
 
-          <View className="relative z-10">
-            <View className="rounded-xl p-4 bg-surface-container-high shadow-md overflow-hidden flex-col gap-2 relative">
-              <View className="absolute -right-8 -bottom-8 w-32 h-32 bg-secondary/15 rounded-full" />
-
-              <View className="flex-col relative z-10">
-                <Text className="text-[18px] text-on-surface font-bold leading-snug">Lanjutkan sebagai Tamu</Text>
-                <Text className="text-[13px] text-on-surface-variant pt-1 leading-relaxed">
-                  Jelajahi katalog komponen, cek kompatibilitas soket & daya, serta simpan draft rakitan di memori perangkat lokal tanpa akun.
+          {!isSupabaseConfigured && (
+            <View className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 flex-row items-start gap-2.5 relative z-10">
+              <MaterialIcons name="warning-amber" size={18} color="#fbbf24" />
+              <View className="flex-1">
+                <Text className="text-[12px] font-bold text-amber-300">
+                  Supabase URL Belum Diatur
+                </Text>
+                <Text className="text-[11px] text-amber-200/80 mt-0.5 leading-relaxed">
+                  Isi EXPO_PUBLIC_SUPABASE_URL dan EXPO_PUBLIC_SUPABASE_ANON_KEY di file .env lalu muat ulang aplikasi.
                 </Text>
               </View>
-
-              <View className="pt-2 relative z-10">
-                <TouchableOpacity 
-                  onPress={() => router.replace('/(tabs)')}
-                  className="w-full flex-row items-center justify-between px-4 py-3.5 rounded-xl bg-primary shadow-sm"
-                >
-                  <View className="flex-row items-center gap-2">
-                    <MaterialIcons name="build-circle" size={20} color="#002e6a" />
-                    <Text className="text-on-primary text-[15px] font-semibold">Mulai Rakit sebagai Tamu</Text>
-                  </View>
-                  <MaterialIcons name="arrow-forward" size={20} color="#002e6a" />
-                </TouchableOpacity>
-              </View>
             </View>
-          </View>
+          )}
 
-          <View className="flex-row items-center justify-center py-1 relative">
-            <View className="w-full h-[1px] bg-surface-container-highest" />
-            <View className="absolute px-3 bg-surface">
-              <Text className="text-[11px] text-outline font-medium">Atau Masuk ke Akun PayCom</Text>
+          {errorMessage && (
+            <View className="p-3.5 rounded-xl bg-red-950/40 border border-red-500/40 flex-row items-start gap-2.5 relative z-10">
+              <MaterialIcons name="error-outline" size={18} color="#f87171" />
+              <Text className="flex-1 text-[12px] text-red-200 leading-relaxed">
+                {errorMessage}
+              </Text>
             </View>
-          </View>
+          )}
 
           <View className="flex-col gap-4 relative z-10">
+            {isRegistering && (
+              <>
+                <View className="flex-col gap-1">
+                  <Text className="text-[12px] text-on-surface-variant font-medium">
+                    Nama Lengkap Builder
+                  </Text>
+                  <View className="flex-row items-center rounded-xl bg-surface-container-lowest h-12 px-3">
+                    <MaterialIcons name="person" size={18} color="#c2c6d6" />
+                    <TextInput
+                      value={builderName}
+                      onChangeText={setBuilderName}
+                      editable={!isSubmitting}
+                      className="flex-1 h-full px-2 text-[14px] text-on-surface font-normal"
+                      placeholder="Contoh: Ahmad Builder"
+                      placeholderTextColor="#8c909f"
+                      autoCapitalize="words"
+                    />
+                  </View>
+                </View>
+
+                <View className="flex-col gap-1">
+                  <Text className="text-[12px] text-on-surface-variant font-medium">
+                    NIM / ID Praktikan (Opsional)
+                  </Text>
+                  <View className="flex-row items-center rounded-xl bg-surface-container-lowest h-12 px-3">
+                    <MaterialIcons name="badge" size={18} color="#c2c6d6" />
+                    <TextInput
+                      value={nim}
+                      onChangeText={setNim}
+                      editable={!isSubmitting}
+                      className="flex-1 h-full px-2 text-[14px] text-on-surface font-normal"
+                      placeholder="202210370311xxx"
+                      placeholderTextColor="#8c909f"
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                </View>
+              </>
+            )}
+
             <View className="flex-col gap-1">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-[12px] text-on-surface-variant font-medium">PayCom ID / Email</Text>
-              </View>
+              <Text className="text-[12px] text-on-surface-variant font-medium">Email</Text>
               <View className="flex-row items-center rounded-xl bg-surface-container-lowest h-12 px-3">
-                <MaterialIcons name="badge" size={18} color="#c2c6d6" />
-                <TextInput 
+                <MaterialIcons name="alternate-email" size={18} color="#c2c6d6" />
+                <TextInput
                   value={email}
                   onChangeText={setEmail}
+                  editable={!isSubmitting}
                   className="flex-1 h-full px-2 text-[14px] text-on-surface font-normal"
                   placeholder="builder@paycom.id"
                   placeholderTextColor="#8c909f"
-                  autoComplete="username"
+                  keyboardType="email-address"
                   autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
                 />
               </View>
             </View>
 
             <View className="flex-col gap-1">
               <View className="flex-row items-center justify-between">
-                <Text className="text-[12px] text-on-surface-variant font-medium">Kata Sandi</Text>
-                <TouchableOpacity onPress={() => Alert.alert('Lupa Sandi', 'Tautan pemulihan kata sandi telah dikirim ke email terdaftar.')}>
-                  <Text className="text-[12px] text-secondary font-medium">Lupa Sandi?</Text>
-                </TouchableOpacity>
+                <Text className="text-[12px] text-on-surface-variant font-medium">
+                  Kata Sandi
+                </Text>
+                <Text className="text-[11px] text-outline">Min. 6 karakter</Text>
               </View>
               <View className="flex-row items-center rounded-xl bg-surface-container-lowest h-12 pl-3 pr-2">
                 <MaterialIcons name="lock" size={18} color="#c2c6d6" />
-                <TextInput 
+                <TextInput
                   value={password}
                   onChangeText={setPassword}
+                  editable={!isSubmitting}
                   className="flex-1 h-full px-2 text-[14px] text-on-surface font-normal"
                   placeholder="••••••••••••"
                   placeholderTextColor="#8c909f"
                   secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
                   autoComplete="password"
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   className="w-10 h-10 items-center justify-center"
                   onPress={() => setShowPassword(!showPassword)}
+                  disabled={isSubmitting}
                 >
-                  <MaterialIcons name={showPassword ? "visibility-off" : "visibility"} size={18} color="#c2c6d6" />
+                  <MaterialIcons
+                    name={showPassword ? 'visibility-off' : 'visibility'}
+                    size={18}
+                    color="#c2c6d6"
+                  />
                 </TouchableOpacity>
               </View>
             </View>
 
-            <View className="flex-row items-center justify-between pt-1">
-              <TouchableOpacity 
-                className="flex-row items-center gap-2"
-                onPress={() => setRememberDevice(!rememberDevice)}
-              >
-                <View className={`w-4 h-4 rounded items-center justify-center ${rememberDevice ? 'bg-primary' : 'bg-surface-container-highest'}`}>
-                  {rememberDevice && <MaterialIcons name="check" size={12} color="#002e6a" />}
-                </View>
-                <Text className="text-[12px] text-on-surface font-normal">Ingat Perangkat Ini</Text>
-              </TouchableOpacity>
-              <Text className="text-[11px] text-outline font-medium">Sesi 30 Hari</Text>
-            </View>
-
             <View className="pt-2">
-              <TouchableOpacity 
-                onPress={handleLogin}
-                className="w-full py-3.5 px-4 rounded-xl bg-surface-container-high flex-row items-center justify-center gap-2 shadow-sm active:opacity-80"
+              <TouchableOpacity
+                onPress={handleAuth}
+                disabled={isSubmitting}
+                className={`w-full py-3.5 px-4 rounded-xl flex-row items-center justify-center gap-2 shadow-sm ${
+                  isSubmitting ? 'bg-primary/60' : 'bg-primary active:opacity-85'
+                }`}
               >
-                <MaterialIcons name="login" size={18} color="#adc6ff" />
-                <Text className="text-primary text-[15px] font-semibold">Masuk dengan Akun PayCom</Text>
+                {isSubmitting ? (
+                  <>
+                    <ActivityIndicator size="small" color="#002e6a" />
+                    <Text className="text-on-primary text-[15px] font-bold">
+                      {isRegistering ? 'Mendaftarkan...' : 'Memverifikasi...'}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <MaterialIcons
+                      name={isRegistering ? 'person-add' : 'login'}
+                      size={18}
+                      color="#002e6a"
+                    />
+                    <Text className="text-on-primary text-[15px] font-bold">
+                      {isRegistering ? 'Daftar Akun PayCom' : 'Masuk ke PayCom'}
+                    </Text>
+                  </>
+                )}
               </TouchableOpacity>
             </View>
           </View>
 
-          <View className="flex-col gap-4 pt-2 relative z-10">
-            <View className="p-3.5 rounded-xl bg-surface-container-low flex-row items-start gap-2.5 shadow-sm">
-              <View className="w-7 h-7 rounded-lg bg-surface-container-high items-center justify-center shrink-0 mt-0.5">
-                <MaterialIcons name="cloud-sync" size={16} color="#4cd7f6" />
-              </View>
-              <View className="flex-col flex-1 shrink">
-                <Text className="text-[12px] font-semibold text-on-surface">Keuntungan Akun Terdaftar:</Text>
-                <Text className="text-[12px] text-on-surface-variant leading-relaxed mt-0.5">
-                  Simpan rakitan multi-slot ke Cloud, konsultasi langsung teknisi 24/7 & pelacakan garansi komponen per unit.
-                </Text>
-              </View>
-            </View>
-
+          <View className="flex-col gap-4 pt-1 relative z-10">
             <View className="flex-row items-center justify-center gap-1.5">
-              <Text className="text-on-surface-variant text-[12px]">Belum punya akun?</Text>
-              <TouchableOpacity onPress={() => Alert.alert('Pendaftaran', 'Pendaftaran akun baru terbuka. Silakan hubungi admin laboratorium.')}>
-                <Text className="font-semibold text-primary text-[12px] underline" style={{ textDecorationColor: '#adc6ff80' }}>Daftar Sekarang</Text>
+              <Text className="text-on-surface-variant text-[12px]">
+                {isRegistering ? 'Sudah punya akun?' : 'Belum punya akun?'}
+              </Text>
+              <TouchableOpacity onPress={toggleMode} disabled={isSubmitting}>
+                <Text
+                  className="font-semibold text-secondary text-[12px] underline"
+                  style={{ textDecorationColor: '#4cd7f680' }}
+                >
+                  {isRegistering ? 'Masuk di sini' : 'Daftar Sekarang'}
+                </Text>
               </TouchableOpacity>
             </View>
 
-            <View className="flex-col items-center justify-center text-center gap-1 pt-1 opacity-75">
-              <View className="flex-row items-center gap-1">
-                <MaterialIcons name="shield" size={13} color="#8c909f" />
-                <Text className="text-[11px] text-outline font-medium">PayCom</Text>
+            <View className="p-3.5 rounded-xl bg-surface-container-low flex-row items-start gap-2.5 shadow-sm">
+              <View className="w-7 h-7 rounded-lg bg-surface-container-high items-center justify-center shrink-0 mt-0.5">
+                <MaterialIcons name="verified-user" size={16} color="#4cd7f6" />
               </View>
-              <Text className="text-[11px] text-outline text-center">Semua benchmark TDP & soket diverifikasi secara independen.</Text>
+              <View className="flex-col flex-1 shrink">
+                <Text className="text-[12px] font-semibold text-on-surface">
+                  Keamanan Sesi & Isolasi Data:
+                </Text>
+                <Text className="text-[12px] text-on-surface-variant leading-relaxed mt-0.5">
+                  Token sesi disimpan terenkripsi menggunakan Expo SecureStore dan setiap draft rakitan dilindungi kebijakan Row Level Security (RLS).
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -243,4 +360,3 @@ export default function LoginScreen() {
     </View>
   );
 }
-

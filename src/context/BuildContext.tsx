@@ -170,6 +170,7 @@ type BuildContextType = {
   removeSlotItem: (slotId: string) => void;
   quickFill: () => void;
   resetSlots: () => void;
+  loadSlots: (savedSlots: BuildSlot[]) => void;
   formatRupiah: (price: number) => string;
 };
 
@@ -236,6 +237,10 @@ export function BuildProvider({ children }: { children: React.ReactNode }) {
     setSlots(DEFAULT_SLOTS);
   };
 
+  const loadSlots = (savedSlots: BuildSlot[]) => {
+    setSlots(savedSlots);
+  };
+
   return (
     <BuildContext.Provider
       value={{
@@ -253,6 +258,7 @@ export function BuildProvider({ children }: { children: React.ReactNode }) {
         removeSlotItem,
         quickFill,
         resetSlots,
+        loadSlots,
         formatRupiah
       }}
     >

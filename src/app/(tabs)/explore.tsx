@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Alert,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useBuild } from '../../context/BuildContext';
+import { useAuth } from '../../context/AuthContext';
+import { createSavedBuild } from '../../services/buildService';
 
 export default function SummaryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
 
   const {
+    slots,
     filledSlots,
     filledCount,
     totalPrice,
@@ -26,6 +40,9 @@ export default function SummaryScreen() {
   const [paymentMethod, setPaymentMethod] = useState<'qris' | 'va' | 'transfer'>('qris');
   const [estimatedDelivery, setEstimatedDelivery] = useState<string>('2 - 3 Hari Kerja');
   const [orderValidationMessage, setOrderValidationMessage] = useState<string>('');
+  const [isDraftModalOpen, setIsDraftModalOpen] = useState<boolean>(false);
+  const [draftName, setDraftName] = useState<string>('');
+  const [isSavingDraft, setIsSavingDraft] = useState<boolean>(false);
 
   useEffect(() => {
     console.log('[Modul 2] SummaryScreen dimuat untuk pertama kali.');
@@ -100,7 +117,46 @@ export default function SummaryScreen() {
       Alert.alert('Rakitan Kosong', 'Pilih komponen terlebih dahulu untuk menyimpan draft.');
       return;
     }
-    Alert.alert('Draft Disimpan', 'Rakitan #PC-8891 berhasil disimpan ke draft akunmu.', [{ text: 'OK' }]);
+    setDraftName(`Rakitan PC (${filledCount} Komponen)`);
+    setIsDraftModalOpen(true);
+  };
+
+  const handleConfirmSaveDraft = async () => {
+    if (!user?.id) {
+      Alert.alert('Belum Masuk', 'Silakan masuk ke akun PayCom untuk menyimpan draft ke cloud.');
+      return;
+    }
+
+    const cleanName = draftName.trim();
+    if (!cleanName) {
+      Alert.alert('Nama Kosong', 'Masukkan nama draft rakitan terlebih dahulu.');
+      return;
+    }
+
+    setIsSavingDraft(true);
+    try {
+      await createSavedBuild({
+        user_id: user.id,
+        build_name: cleanName,
+        total_price: totalPrice,
+        total_wattage: totalWattage,
+        filled_count: filledCount,
+        slots_json: slots,
+      });
+      setIsDraftModalOpen(false);
+      Alert.alert(
+        'Draft Tersimpan di Cloud',
+        `"${cleanName}" berhasil disimpan ke database Supabase milik akunmu.`,
+        [
+          { text: 'Lihat di Profil', onPress: () => router.push('/(tabs)/profile') },
+          { text: 'Tutup', style: 'cancel' },
+        ]
+      );
+    } catch (err: any) {
+      Alert.alert('Gagal Menyimpan Draft', err?.message || 'Terjadi kesalahan saat menyimpan ke cloud.');
+    } finally {
+      setIsSavingDraft(false);
+    }
   };
 
   const handleRemoveVoucher = () => {
@@ -460,12 +516,73 @@ export default function SummaryScreen() {
             </View>
 
             <TouchableOpacity className="w-full py-3 px-4 rounded-xl bg-surface-container-low flex-row items-center justify-center gap-2" onPress={handleDraft}>
-              <MaterialIcons name="bookmark-border" size={18} color="#c2c6d6" />
-              <Text className="text-on-surface-variant text-[12px]">Simpan ke Draft Rakitan Saya</Text>
+              <MaterialIcons name="cloud-upload" size={18} color="#4cd7f6" />
+              <Text className="text-secondary text-[12px] font-semibold">Simpan ke Draft Rakitan Cloud</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={isDraftModalOpen}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsDraftModalOpen(false)}
+      >
+        <View className="flex-1 justify-end bg-black/60">
+          <View
+            className="bg-surface-container-high rounded-t-3xl p-5 border-t border-surface-variant/30 gap-4"
+            style={{ paddingBottom: Math.max(insets.bottom, 24) }}
+          >
+            <View className="flex-row items-center justify-between pb-2 border-b border-surface-variant/20">
+              <Text className="text-[16px] font-bold text-on-surface">Simpan Draft ke Cloud</Text>
+              <TouchableOpacity
+                onPress={() => setIsDraftModalOpen(false)}
+                disabled={isSavingDraft}
+                className="w-8 h-8 items-center justify-center rounded-full bg-surface-container"
+              >
+                <MaterialIcons name="close" size={18} color="#c2c6d6" />
+              </TouchableOpacity>
+            </View>
+
+            <View className="gap-2">
+              <Text className="text-[12px] text-outline font-medium">Nama Rakitan</Text>
+              <TextInput
+                value={draftName}
+                onChangeText={setDraftName}
+                editable={!isSavingDraft}
+                placeholder="Contoh: PC Gaming 4K RTX"
+                placeholderTextColor="#8c909f"
+                className="h-12 px-3 rounded-xl bg-surface-container-lowest text-on-surface text-[14px]"
+              />
+              <Text className="text-[11px] text-on-surface-variant">
+                {filledCount} komponen • {totalWattage}W • {formatRupiah(totalPrice)}
+              </Text>
+            </View>
+
+            <View className="flex-row gap-2 pt-1">
+              <TouchableOpacity
+                onPress={() => setIsDraftModalOpen(false)}
+                disabled={isSavingDraft}
+                className="flex-1 py-3 rounded-xl bg-surface-container items-center justify-center"
+              >
+                <Text className="text-[13px] font-semibold text-on-surface-variant">Batal</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleConfirmSaveDraft}
+                disabled={isSavingDraft}
+                className="flex-1 py-3 rounded-xl bg-primary items-center justify-center flex-row gap-1.5"
+              >
+                {isSavingDraft && <ActivityIndicator size="small" color="#002e6a" />}
+                <Text className="text-[13px] font-bold text-on-primary">
+                  {isSavingDraft ? 'Menyimpan...' : 'Simpan Cloud'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <View 
         className="absolute left-4 right-4 z-40 bg-surface-container-lowest/95 rounded-2xl p-3.5 flex-col gap-2.5 shadow-md"

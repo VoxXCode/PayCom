@@ -31,78 +31,81 @@ export default function InvoiceScreen() {
   };
 
   return (
-    <View className="flex-1 bg-surface relative" style={{ paddingTop: insets.top }}>
-      <View className="h-16 px-gutter flex-row items-center justify-between border-b border-surface-variant/30">
+    <View className="flex-1 bg-[#0b0f19] relative" style={{ paddingTop: insets.top }}>
+      {/* Header */}
+      <View className="h-14 px-4 flex-row items-center justify-between border-b border-[#1e293b]">
         <View className="flex-row items-center gap-2">
           <TouchableOpacity 
             onPress={handleClose}
-            className="h-10 px-3 rounded-xl bg-surface-container-high items-center justify-center flex-row gap-1.5"
+            className="h-8 px-2.5 rounded-xl bg-[#151c2c] border border-[#222f46] items-center justify-center flex-row gap-1"
           >
-            <MaterialIcons name="arrow-back" size={18} color="#c2c6d6" />
-            <Text className="text-[13px] font-semibold text-on-surface">Kembali</Text>
+            <MaterialIcons name="arrow-back" size={16} color="#94a3b8" />
+            <Text className="text-[12px] font-bold text-white">Kembali</Text>
           </TouchableOpacity>
-          <Text className="text-[16px] font-bold text-on-surface">Invoice #PC-8891</Text>
+          <Text className="text-[15px] font-extrabold text-white ml-1">Invoice #PC-8891</Text>
         </View>
-        <View className="px-2.5 py-1 rounded-full bg-secondary-container">
-          <Text className="text-[11px] font-bold text-on-secondary-container">Resmi</Text>
+        <View className="px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30">
+          <Text className="text-[10px] font-bold text-[#38bdf8] uppercase">Resmi</Text>
         </View>
       </View>
 
       <ScrollView 
-        className="flex-1 px-gutter py-4"
+        className="flex-1 px-4 py-4"
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) + 24 }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="p-4 rounded-2xl bg-surface-container-low border border-surface-variant/20 gap-3">
-          <View className="flex-row items-center justify-between pb-3 border-b border-surface-variant/30">
+        {/* Receipt Card */}
+        <View className="p-4 rounded-3xl bg-[#151c2c] border border-[#222f46] gap-3 shadow-md">
+          <View className="flex-row items-center justify-between pb-3 border-b border-[#1e293b]">
             <View>
-              <Text className="text-[20px] font-bold text-on-surface">
-                <Text className="text-secondary">Pay</Text>Com Studio
+              <Text className="text-[18px] font-extrabold text-white">
+                PAY<Text className="text-[#38bdf8]">COM</Text> Studio
               </Text>
-              <Text className="text-[11px] text-outline mt-0.5">Laboratorium Perakitan PC Resmi</Text>
+              <Text className="text-[11px] text-[#94a3b8] mt-0.5">Laboratorium Perakitan PC Resmi</Text>
             </View>
             <View className="items-end">
-              <Text className="text-[11px] text-outline">Tanggal:</Text>
-              <Text className="text-[12px] font-semibold text-on-surface">20 Oktober 2026</Text>
+              <Text className="text-[10px] text-[#64748b]">Tanggal:</Text>
+              <Text className="text-[12px] font-bold text-white">20 Oktober 2026</Text>
             </View>
           </View>
 
           <View className="flex-row justify-between py-1">
             <View>
-              <Text className="text-[11px] text-outline">Penerima:</Text>
-              <Text className="text-[13px] font-semibold text-on-surface">Praktikan UMM Mobile</Text>
-              <Text className="text-[11px] text-on-surface-variant">Malang, Jawa Timur</Text>
+              <Text className="text-[10px] text-[#64748b]">Penerima:</Text>
+              <Text className="text-[13px] font-bold text-white">Builder PayCom</Text>
+              <Text className="text-[11px] text-[#94a3b8]">Malang, Jawa Timur</Text>
             </View>
             <View className="items-end">
-              <Text className="text-[11px] text-outline">Estimasi Daya:</Text>
-              <Text className="text-[13px] font-semibold text-secondary">{totalWattage} Watt</Text>
-              <Text className="text-[11px] text-on-surface-variant">{filledCount} Komponen Terpasang</Text>
+              <Text className="text-[10px] text-[#64748b]">Estimasi Daya:</Text>
+              <Text className="text-[13px] font-bold text-[#38bdf8]">{totalWattage} Watt</Text>
+              <Text className="text-[11px] text-[#94a3b8]">{filledCount} Komponen Terpasang</Text>
             </View>
           </View>
         </View>
 
-        <View className="mt-4 rounded-2xl bg-surface-container p-4 gap-3">
-          <Text className="text-[14px] font-bold text-on-surface pb-1 border-b border-surface-variant/20">
+        {/* Components breakdown */}
+        <View className="mt-4 rounded-3xl bg-[#151c2c] border border-[#222f46] p-4 gap-3 shadow-md">
+          <Text className="text-[14px] font-bold text-white pb-2 border-b border-[#1e293b]">
             Daftar Komponen ({filledCount} Item)
           </Text>
 
           {filledCount === 0 ? (
-            <Text className="text-[12px] text-outline py-2">Belum ada komponen yang dipilih.</Text>
+            <Text className="text-[12px] text-[#64748b] py-2">Belum ada komponen yang dipilih.</Text>
           ) : (
-            filledSlots.map((slot, index) => {
+            filledSlots.map((slot) => {
               const item = slot.selectedItem!;
               return (
-                <View key={slot.id} className="flex-row items-center gap-3 py-2 border-b border-surface-variant/15">
+                <View key={slot.id} className="flex-row items-center gap-3 py-2 border-b border-[#1e293b]">
                   <Image 
                     source={{ uri: item.image }} 
-                    className="w-10 h-10 rounded-lg bg-surface-container-highest shrink-0" 
+                    className="w-12 h-12 rounded-xl bg-[#0f1422] shrink-0" 
                     style={{ resizeMode: 'cover' }} 
                   />
                   <View className="flex-1">
-                    <Text className="text-[10px] text-outline font-medium">{slot.name} ({slot.category})</Text>
-                    <Text className="text-[12px] text-on-surface font-semibold" numberOfLines={1}>{item.name}</Text>
+                    <Text className="text-[10px] text-[#38bdf8] font-bold uppercase">{slot.name} ({slot.category})</Text>
+                    <Text className="text-[12px] text-white font-bold" numberOfLines={1}>{item.name}</Text>
                   </View>
-                  <Text className="text-[12px] font-bold text-secondary">{formatRupiah(item.price)}</Text>
+                  <Text className="text-[12px] font-bold text-white">{formatRupiah(item.price)}</Text>
                 </View>
               );
             })
@@ -110,42 +113,42 @@ export default function InvoiceScreen() {
 
           <View className="gap-2 pt-2">
             <View className="flex-row justify-between">
-              <Text className="text-[12px] text-on-surface-variant">Subtotal Komponen</Text>
-              <Text className="text-[12px] font-semibold text-on-surface">{formatRupiah(totalPrice)}</Text>
+              <Text className="text-[12px] text-[#94a3b8]">Subtotal Komponen</Text>
+              <Text className="text-[12px] font-bold text-white">{formatRupiah(totalPrice)}</Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-[12px] text-on-surface-variant">Jasa Perakitan & Cable Mgmt</Text>
-              <Text className="text-[12px] font-semibold text-secondary">Gratis</Text>
+              <Text className="text-[12px] text-[#94a3b8]">Jasa Perakitan & Cable Mgmt</Text>
+              <Text className="text-[12px] font-bold text-[#38bdf8]">Gratis</Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-[12px] text-on-surface-variant">Stress Test 24 Jam Non-Stop</Text>
-              <Text className="text-[12px] font-semibold text-secondary">Termasuk</Text>
+              <Text className="text-[12px] text-[#94a3b8]">Stress Test 24 Jam Non-Stop</Text>
+              <Text className="text-[12px] font-bold text-[#38bdf8]">Termasuk</Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-[12px] text-on-surface-variant">Asuransi Pengiriman & Packing Kayu</Text>
-              <Text className="text-[12px] font-semibold text-on-surface">{formatRupiah(shippingFee)}</Text>
+              <Text className="text-[12px] text-[#94a3b8]">Asuransi Pengiriman & Packing Kayu</Text>
+              <Text className="text-[12px] font-bold text-white">{formatRupiah(shippingFee)}</Text>
             </View>
             {discount > 0 && (
               <View className="flex-row justify-between">
-                <Text className="text-[12px] text-primary">Voucher Promo (NEONPC2025)</Text>
-                <Text className="text-[12px] font-semibold text-primary">-Rp 500.000</Text>
+                <Text className="text-[12px] text-[#38bdf8]">Voucher Promo (NEONPC2025)</Text>
+                <Text className="text-[12px] font-bold text-[#38bdf8]">-Rp 500.000</Text>
               </View>
             )}
 
-            <View className="flex-row justify-between pt-3 border-t border-surface-variant/30 items-center">
-              <Text className="text-[14px] font-bold text-on-surface">Total Pembayaran</Text>
-              <Text className="text-[18px] font-bold text-primary">{formatRupiah(grandTotal)}</Text>
+            <View className="flex-row justify-between pt-3 border-t border-[#1e293b] items-center">
+              <Text className="text-[14px] font-bold text-white">Total Pembayaran</Text>
+              <Text className="text-[18px] font-extrabold text-[#38bdf8]">{formatRupiah(grandTotal)}</Text>
             </View>
           </View>
         </View>
 
-        <View className="mt-5 gap-2.5">
+        <View className="mt-5">
           <TouchableOpacity 
             onPress={handleClose}
-            className="w-full py-3.5 rounded-xl bg-primary-container items-center justify-center flex-row gap-2"
+            className="w-full py-3.5 rounded-full bg-[#2563eb] items-center justify-center flex-row gap-2 shadow-lg shadow-blue-600/30"
           >
-            <MaterialIcons name="check" size={18} color="#002e6a" />
-            <Text className="text-[14px] font-bold text-on-primary">Tutup & Kembali</Text>
+            <MaterialIcons name="check" size={18} color="#ffffff" />
+            <Text className="text-[14px] font-bold text-white">Selesai & Kembali</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

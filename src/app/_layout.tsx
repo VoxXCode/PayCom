@@ -19,7 +19,7 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthScreen = segments[0] === 'login';
+    const inAuthScreen = segments[0] === 'login' || segments[0] === 'register';
 
     if (!session && !inAuthScreen) {
       router.replace('/login');
@@ -65,6 +65,13 @@ function RootLayoutNav() {
         name="login"
         options={{
           title: 'Masuk Akun PayCom',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="register"
+        options={{
+          title: 'Daftar Akun PayCom',
           headerShown: false,
         }}
       />

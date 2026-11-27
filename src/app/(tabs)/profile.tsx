@@ -66,6 +66,7 @@ export default function ProfileScreen() {
   const [isLoadingBuilds, setIsLoadingBuilds] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [buildsError, setBuildsError] = useState<string | null>(null);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
   useEffect(() => {
@@ -151,27 +152,21 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Konfirmasi Keluar',
-      'Sesi akan diakhiri dan token terenkripsi dihapus dari perangkat. Lanjutkan?',
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Keluar',
-          style: 'destructive',
-          onPress: async () => {
-            setIsLoggingOut(true);
-            try {
-              await signOut();
-            } catch (err: any) {
-              Alert.alert('Error Keluar', err?.message || 'Gagal keluar dari sesi.');
-            } finally {
-              setIsLoggingOut(false);
-            }
-          },
-        },
-      ]
-    );
+    setIsLogoutModalOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      setIsLogoutModalOpen(false);
+      router.replace('/login');
+    } catch (err: any) {
+      Alert.alert('Error Keluar', err?.message || 'Gagal keluar dari sesi.');
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const handleLoadSavedBuild = (build: SavedBuild) => {
@@ -658,6 +653,50 @@ export default function ProfileScreen() {
                 {isSavingProfile && <ActivityIndicator size="small" color="#002e6a" />}
                 <Text className="text-[13px] font-bold text-on-primary">
                   {isSavingProfile ? 'Menyimpan...' : 'Simpan Profil'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={isLogoutModalOpen}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => !isLoggingOut && setIsLogoutModalOpen(false)}
+      >
+        <View className="flex-1 justify-center items-center px-6 bg-black/70">
+          <View className="w-full max-w-[360px] bg-surface-container-high rounded-2xl p-5 border border-surface-variant/30 gap-4">
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-xl bg-red-950/50 border border-red-500/30 items-center justify-center">
+                <MaterialIcons name="logout" size={20} color="#f87171" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-[16px] font-bold text-on-surface">Konfirmasi Keluar</Text>
+                <Text className="text-[12px] text-on-surface-variant mt-0.5">
+                  Sesi akan diakhiri dan token dihapus dari perangkat.
+                </Text>
+              </View>
+            </View>
+
+            <View className="flex-row gap-2.5 pt-1">
+              <TouchableOpacity
+                onPress={() => setIsLogoutModalOpen(false)}
+                disabled={isLoggingOut}
+                className="flex-1 py-3 rounded-xl bg-surface-container items-center justify-center"
+              >
+                <Text className="text-[13px] font-semibold text-on-surface-variant">Batal</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleConfirmLogout}
+                disabled={isLoggingOut}
+                className="flex-1 py-3 rounded-xl bg-red-500/90 items-center justify-center flex-row gap-1.5"
+              >
+                {isLoggingOut && <ActivityIndicator size="small" color="#ffffff" />}
+                <Text className="text-[13px] font-bold text-white">
+                  {isLoggingOut ? 'Keluar...' : 'Ya, Keluar'}
                 </Text>
               </TouchableOpacity>
             </View>

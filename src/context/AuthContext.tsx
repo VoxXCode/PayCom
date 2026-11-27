@@ -51,8 +51,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
+    try {
+      const timeoutPromise = new Promise<{ error: Error }>((resolve) =>
+        setTimeout(() => resolve({ error: new Error('Sign out timeout') }), 3000)
+      );
+      const result = await Promise.race([supabase.auth.signOut(), timeoutPromise]);
+      if (result?.error) {
+        await supabase.auth.signOut({ scope: 'local' });
+      }
+    } catch {
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch {}
+    } finally {
+      setSession(null);
+    }
   };
 
   return (

@@ -154,25 +154,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View className="px-gutter pt-1 pb-1">
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/simulation')}
-            className="p-3 rounded-xl bg-secondary/15 border border-secondary/30 flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center gap-2.5 flex-1 pr-2">
-              <View className="w-8 h-8 rounded-lg bg-secondary/20 items-center justify-center">
-                <MaterialIcons name="speed" size={18} color="#4cd7f6" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-[11px] text-on-surface-variant">
-                  Uji beban asynchronous, Promise (.then), & fetch External API
-                </Text>
-              </View>
-            </View>
-            <MaterialIcons name="arrow-forward" size={18} color="#4cd7f6" />
-          </TouchableOpacity>
-        </View>
-
         <View className="px-gutter flex-row items-center justify-between pt-2 pb-1">
           <View className="flex-row items-center gap-2">
             <Text className="text-[14px] text-on-surface font-semibold">Slot Komponen Rakitan</Text>

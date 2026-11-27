@@ -43,18 +43,16 @@ export default function ProfileScreen() {
     user?.email?.split('@')[0] ||
     'Builder PayCom';
   const initialEmail = user?.email || '-';
-  const initialNim = (user?.user_metadata?.nim as string) || '-';
+  const userUid = user?.id || '-';
   const initialBio =
     (user?.user_metadata?.bio as string) || 'PC Enthusiast & Custom Rig Builder';
 
   const [userName, setUserName] = useState<string>(initialName);
   const [userEmail, setUserEmail] = useState<string>(initialEmail);
-  const [userNim, setUserNim] = useState<string>(initialNim);
   const [userBio, setUserBio] = useState<string>(initialBio);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editName, setEditName] = useState<string>(userName);
-  const [editNim, setEditNim] = useState<string>(userNim);
   const [editBio, setEditBio] = useState<string>(userBio);
   const [isSavingProfile, setIsSavingProfile] = useState<boolean>(false);
 
@@ -76,7 +74,6 @@ export default function ProfileScreen() {
         'Builder PayCom'
     );
     setUserEmail(user?.email || '-');
-    setUserNim((user?.user_metadata?.nim as string) || '-');
     setUserBio(
       (user?.user_metadata?.bio as string) || 'PC Enthusiast & Custom Rig Builder'
     );
@@ -112,7 +109,6 @@ export default function ProfileScreen() {
 
   const handleOpenEdit = () => {
     setEditName(userName);
-    setEditNim(userNim);
     setEditBio(userBio);
     setIsEditModalOpen(true);
   };
@@ -129,7 +125,6 @@ export default function ProfileScreen() {
       const { error } = await supabase.auth.updateUser({
         data: {
           full_name: cleanName,
-          nim: editNim.trim() || '-',
           bio: editBio.trim() || 'PC Enthusiast & Custom Rig Builder',
         },
       });
@@ -140,7 +135,6 @@ export default function ProfileScreen() {
       }
 
       setUserName(cleanName);
-      setUserNim(editNim.trim() || '-');
       setUserBio(editBio.trim() || 'PC Enthusiast & Custom Rig Builder');
       setIsEditModalOpen(false);
       Alert.alert('Sukses', 'Profil berhasil diperbarui di Supabase!');
@@ -297,7 +291,9 @@ export default function ProfileScreen() {
                 </View>
               </View>
               <Text className="text-[12px] text-[#94a3b8] mt-1">{userEmail}</Text>
-              <Text className="text-[11px] text-[#64748b] mt-0.5">NIM: {userNim}</Text>
+              <Text className="text-[11px] text-[#64748b] mt-0.5 font-mono" numberOfLines={1}>
+                UID: {user?.id || '-'}
+              </Text>
             </View>
           </View>
 
@@ -480,12 +476,12 @@ export default function ProfileScreen() {
               </View>
 
               <View>
-                <Text className="text-[12px] font-semibold text-[#94a3b8] mb-1">NIM / ID</Text>
-                <TextInput
-                  value={editNim}
-                  onChangeText={setEditNim}
-                  className="h-12 px-3.5 rounded-2xl bg-[#0f1422] border border-[#222f46] text-white text-[13px]"
-                />
+                <Text className="text-[12px] font-semibold text-[#94a3b8] mb-1">UID Akun (Supabase Auth)</Text>
+                <View className="h-12 px-3.5 rounded-2xl bg-[#0f1422] border border-[#222f46] justify-center">
+                  <Text className="text-[#64748b] text-[11px] font-mono" numberOfLines={1}>
+                    {user?.id || '-'}
+                  </Text>
+                </View>
               </View>
 
               <View>

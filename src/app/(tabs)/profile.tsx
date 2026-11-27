@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useBuild } from '../../context/BuildContext';
@@ -224,414 +224,277 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View className="flex-1 bg-surface relative">
+    <View className="flex-1 bg-[#0b0f19] relative">
       <StatusBar style="light" />
 
+      {/* Top Header */}
       <View
-        className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
-        style={{ paddingTop: Math.max(insets.top, 16) }}
+        className="w-full z-40 bg-[#0b0f19]/95 border-b border-[#1e293b]"
+        style={{ paddingTop: Math.max(insets.top, 14) }}
       >
-        <View className="h-16 px-gutter flex-row items-center justify-between">
+        <View className="h-14 px-4 flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <View className="flex-row items-center gap-1">
-              <Text className="text-[20px] tracking-tight text-on-surface font-bold">
-                <Text className="text-secondary">Pay</Text>Com
-              </Text>
+            <View className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 items-center justify-center">
+              <MaterialIcons name="person" size={18} color="#38bdf8" />
             </View>
+            <Text className="text-[17px] font-extrabold text-white">
+              Profil Pengguna
+            </Text>
           </View>
-          <View className="flex-row items-center gap-1.5">
+
+          <View className="flex-row items-center gap-2">
             <TouchableOpacity
               onPress={handleOpenEdit}
-              className="h-10 px-3 flex-row items-center gap-1.5 rounded-xl bg-surface-container-low"
+              className="h-8 px-3 rounded-xl bg-[#151c2c] border border-[#222f46] flex-row items-center gap-1"
             >
-              <MaterialIcons name="edit" size={16} color="#4cd7f6" />
-              <Text className="text-[12px] text-secondary font-medium">Edit</Text>
+              <MaterialIcons name="edit" size={14} color="#38bdf8" />
+              <Text className="text-[11px] font-bold text-[#38bdf8]">Edit</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               onPress={handleLogout}
-              disabled={isLoggingOut}
-              className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
+              className="w-8 h-8 rounded-xl bg-red-950/40 border border-red-500/30 items-center justify-center"
             >
-              {isLoggingOut ? (
-                <ActivityIndicator size="small" color="#f87171" />
-              ) : (
-                <MaterialIcons name="logout" size={18} color="#f87171" />
-              )}
+              <MaterialIcons name="logout" size={16} color="#f87171" />
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
       <ScrollView
-        className="flex-1 w-full bg-surface"
+        className="flex-1 w-full bg-[#0b0f19]"
         contentContainerStyle={{
-          paddingTop: Math.max(insets.top, 16) + 64,
-          paddingBottom: 32 + 64 + Math.max(insets.bottom, 16),
+          paddingTop: 14,
+          paddingBottom: 40 + 64 + Math.max(insets.bottom, 16),
+          paddingHorizontal: 16,
         }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={() => loadCloudBuilds(true)}
-            tintColor="#4cd7f6"
+            tintColor="#38bdf8"
+            colors={['#38bdf8']}
           />
         }
       >
-        <View className="flex-col w-full px-gutter py-4 gap-4">
-          <View className="rounded-2xl p-5 bg-surface-container-high border border-surface-variant/20 shadow-md relative overflow-hidden">
-            <View className="absolute -top-10 -right-10 w-36 h-36 bg-secondary/15 rounded-full" />
-            <View className="absolute -bottom-10 -left-10 w-32 h-32 bg-primary/10 rounded-full" />
-
-            <View className="flex-row items-center gap-4 relative z-10">
-              <View className="w-18 h-18 rounded-2xl bg-secondary/20 border-2 border-secondary/60 items-center justify-center relative shadow-sm">
-                <MaterialIcons name="person" size={38} color="#4cd7f6" />
-                <View className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-surface-container-high" />
-              </View>
-
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-[18px] text-on-surface font-bold" numberOfLines={1}>
-                    {userName}
-                  </Text>
-                </View>
-                <Text className="text-[12px] text-on-surface-variant mt-0.5" numberOfLines={1}>
-                  {userEmail}
-                </Text>
-                <View className="flex-row flex-wrap items-center gap-1.5 mt-2">
-                  <View className="px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30">
-                    <Text className="text-[10px] text-primary font-semibold">Authenticated</Text>
-                  </View>
-                  {userNim !== '-' && (
-                    <View className="px-2 py-0.5 rounded-full bg-secondary/20 border border-secondary/30">
-                      <Text className="text-[10px] text-secondary font-semibold">NIM: {userNim}</Text>
-                    </View>
-                  )}
-                </View>
-                {user?.id && (
-                  <Text className="text-[10px] text-outline mt-1.5 font-mono" numberOfLines={1}>
-                    UID: {user.id}
-                  </Text>
-                )}
-              </View>
+        {/* User Card matching reference */}
+        <View className="rounded-3xl bg-[#151c2c] border border-[#222f46] p-5 mb-4 shadow-sm relative overflow-hidden">
+          <View className="flex-row items-center gap-4">
+            <View className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#0284c7] items-center justify-center shadow-lg shadow-blue-600/30">
+              <Text className="text-[24px] font-extrabold text-white">
+                {userName.charAt(0).toUpperCase()}
+              </Text>
             </View>
 
-            <View className="mt-4 pt-3 border-t border-surface-variant/30 relative z-10">
-              <Text className="text-[12px] text-on-surface-variant italic">
-                "{userBio}"
+            <View className="flex-1">
+              <View className="flex-row items-center gap-2">
+                <Text className="text-[17px] font-extrabold text-white leading-tight">
+                  {userName}
+                </Text>
+                <View className="px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30">
+                  <Text className="text-[9px] font-bold text-[#38bdf8] uppercase">Pro Builder</Text>
+                </View>
+              </View>
+              <Text className="text-[12px] text-[#94a3b8] mt-1">{userEmail}</Text>
+              <Text className="text-[11px] text-[#64748b] mt-0.5">NIM: {userNim}</Text>
+            </View>
+          </View>
+
+          <View className="mt-4 pt-3 border-t border-[#1e293b]">
+            <Text className="text-[12px] text-slate-300 italic leading-relaxed">
+              "{userBio}"
+            </Text>
+          </View>
+        </View>
+
+        {/* Active Rig Quick Stats */}
+        <View className="rounded-2xl bg-[#151c2c] border border-[#222f46] p-4 mb-4 gap-3">
+          <View className="flex-row items-center justify-between pb-2 border-b border-[#1e293b]">
+            <Text className="text-[13px] font-bold text-white uppercase tracking-wider">
+              Status Rig Aktif
+            </Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)')}>
+              <Text className="text-[12px] font-bold text-[#38bdf8]">Buka Studio</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="flex-row gap-2">
+            <View className="flex-1 bg-[#0f1422] p-2.5 rounded-xl border border-[#1e293b]">
+              <Text className="text-[10px] text-[#64748b]">Slot Terpasang</Text>
+              <Text className="text-[13px] font-bold text-white mt-0.5">{filledCount} / 5</Text>
+            </View>
+            <View className="flex-1 bg-[#0f1422] p-2.5 rounded-xl border border-[#1e293b]">
+              <Text className="text-[10px] text-[#64748b]">Total Daya</Text>
+              <Text className="text-[13px] font-bold text-[#38bdf8] mt-0.5">{totalWattage}W</Text>
+            </View>
+            <View className="flex-1 bg-[#0f1422] p-2.5 rounded-xl border border-[#1e293b]">
+              <Text className="text-[10px] text-[#64748b]">Estimasi Biaya</Text>
+              <Text className="text-[12px] font-bold text-white mt-0.5" numberOfLines={1}>
+                {formatRupiah(totalPrice)}
               </Text>
             </View>
           </View>
+        </View>
 
-          <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20 gap-3">
-            <View className="flex-row items-center justify-between pb-2 border-b border-surface-variant/20">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="cloud-done" size={18} color="#4cd7f6" />
-                <View>
-                  <Text className="text-[14px] font-bold text-on-surface">
-                    Draft Rakitan Cloud
-                  </Text>
-                  <Text className="text-[10px] text-outline">
-                    Terisolasi per akun via Supabase RLS
-                  </Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                onPress={() => loadCloudBuilds(true)}
-                className="px-2.5 py-1 rounded-lg bg-surface-container flex-row items-center gap-1"
-              >
-                <MaterialIcons name="refresh" size={14} color="#4cd7f6" />
-                <Text className="text-[11px] text-secondary font-semibold">Segarkan</Text>
-              </TouchableOpacity>
+        {/* Saved Builds Cloud List */}
+        <View className="rounded-2xl bg-[#151c2c] border border-[#222f46] p-4 mb-4 gap-3">
+          <View className="flex-row items-center justify-between pb-2 border-b border-[#1e293b]">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="cloud-done" size={18} color="#38bdf8" />
+              <Text className="text-[14px] font-bold text-white">Draft Rakitan di Cloud</Text>
             </View>
+            <TouchableOpacity
+              onPress={() => loadCloudBuilds(true)}
+              className="w-7 h-7 rounded-lg bg-[#0f1422] items-center justify-center"
+            >
+              <MaterialIcons name="refresh" size={16} color="#38bdf8" />
+            </TouchableOpacity>
+          </View>
 
-            {isLoadingBuilds ? (
-              <View className="py-6 items-center justify-center gap-2">
-                <ActivityIndicator size="small" color="#4cd7f6" />
-                <Text className="text-[12px] text-on-surface-variant">
-                  Mengambil draft rakitan dari cloud...
-                </Text>
-              </View>
-            ) : buildsError ? (
-              <ErrorMessage message={buildsError} onRetry={() => loadCloudBuilds()} />
-            ) : savedBuilds.length === 0 ? (
-              <View className="py-5 px-3 rounded-xl bg-surface-container/60 items-center gap-1.5">
-                <MaterialIcons name="cloud-off" size={24} color="#8c909f" />
-                <Text className="text-[12px] font-semibold text-on-surface">
-                  Belum Ada Draft Tersimpan
-                </Text>
-                <Text className="text-[11px] text-outline text-center">
-                  Pilih komponen lalu simpan lewat halaman Ringkasan untuk menyimpannya ke akun ini.
-                </Text>
-              </View>
-            ) : (
-              <View className="gap-2.5">
-                {savedBuilds.map((build) => (
-                  <View
-                    key={build.id}
-                    className="p-3 rounded-xl bg-surface-container border border-surface-variant/20 gap-2"
-                  >
-                    <View className="flex-row items-start justify-between gap-2">
-                      <View className="flex-1">
-                        <Text className="text-[13px] font-bold text-on-surface" numberOfLines={1}>
-                          {build.build_name}
-                        </Text>
-                        <Text className="text-[11px] text-outline mt-0.5">
-                          {build.filled_count} Komponen • {build.total_wattage}W
-                        </Text>
-                      </View>
-                      <Text className="text-[12px] font-bold text-secondary">
-                        {formatRupiah(build.total_price)}
-                      </Text>
-                    </View>
-
-                    <View className="flex-row items-center justify-end gap-2 pt-1 border-t border-surface-variant/15">
-                      <TouchableOpacity
-                        onPress={() => handleDeleteSavedBuild(build)}
-                        className="px-2.5 py-1.5 rounded-lg bg-red-950/30 border border-red-500/20 flex-row items-center gap-1"
-                      >
-                        <MaterialIcons name="delete-outline" size={14} color="#f87171" />
-                        <Text className="text-[11px] font-semibold text-red-400">Hapus</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleLoadSavedBuild(build)}
-                        className="px-3 py-1.5 rounded-lg bg-secondary/15 border border-secondary/30 flex-row items-center gap-1"
-                      >
-                        <MaterialIcons name="download" size={14} color="#4cd7f6" />
-                        <Text className="text-[11px] font-semibold text-secondary">Muat Rakitan</Text>
-                      </TouchableOpacity>
-                    </View>
+          {isLoadingBuilds ? (
+            <View className="py-6 items-center justify-center">
+              <ActivityIndicator size="small" color="#38bdf8" />
+              <Text className="text-[11px] text-[#94a3b8] mt-2">Memuat draft rakitan...</Text>
+            </View>
+          ) : buildsError ? (
+            <ErrorMessage message={buildsError} onRetry={() => loadCloudBuilds()} />
+          ) : savedBuilds.length === 0 ? (
+            <View className="py-6 items-center justify-center">
+              <MaterialIcons name="cloud-queue" size={32} color="#64748b" />
+              <Text className="text-[12px] text-[#94a3b8] mt-2">Belum ada draft tersimpan.</Text>
+            </View>
+          ) : (
+            <View className="gap-2.5">
+              {savedBuilds.map((b) => (
+                <View
+                  key={b.id}
+                  className="p-3 rounded-xl bg-[#0f1422] border border-[#1e293b] flex-row items-center justify-between"
+                >
+                  <View className="flex-1 pr-2">
+                    <Text className="text-[13px] font-bold text-white" numberOfLines={1}>
+                      {b.build_name}
+                    </Text>
+                    <Text className="text-[11px] text-[#94a3b8] mt-0.5">
+                      {b.filled_count} item • {b.total_wattage}W • {formatRupiah(b.total_price)}
+                    </Text>
                   </View>
-                ))}
-              </View>
-            )}
+
+                  <View className="flex-row items-center gap-1.5">
+                    <TouchableOpacity
+                      onPress={() => handleLoadSavedBuild(b)}
+                      className="px-2.5 py-1.5 rounded-lg bg-[#2563eb]"
+                    >
+                      <Text className="text-[11px] font-bold text-white">Muat</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteSavedBuild(b)}
+                      className="w-7 h-7 rounded-lg bg-red-950/40 items-center justify-center"
+                    >
+                      <MaterialIcons name="delete-outline" size={16} color="#f87171" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Preferences & Settings */}
+        <View className="rounded-2xl bg-[#151c2c] border border-[#222f46] p-4 mb-4 gap-3">
+          <Text className="text-[13px] font-bold text-white uppercase tracking-wider pb-2 border-b border-[#1e293b]">
+            Pengaturan Aplikasi
+          </Text>
+
+          <View className="flex-row items-center justify-between py-1">
+            <View>
+              <Text className="text-[13px] font-semibold text-white">Sinkronisasi Cloud</Text>
+              <Text className="text-[11px] text-[#64748b]">Simpan otomatis rakitan ke Supabase</Text>
+            </View>
+            <Switch
+              value={cloudSync}
+              onValueChange={setCloudSync}
+              thumbColor={cloudSync ? '#38bdf8' : '#64748b'}
+              trackColor={{ false: '#1e293b', true: '#0284c7' }}
+            />
           </View>
 
-          <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20">
-            <View className="flex-row items-center justify-between pb-3 border-b border-surface-variant/20">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="memory" size={18} color="#4cd7f6" />
-                <Text className="text-[14px] font-bold text-on-surface">Status Rakitan Aktif</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => router.push('/(tabs)')}
-                className="flex-row items-center gap-0.5"
-              >
-                <Text className="text-[12px] text-secondary font-semibold">Ubah Komponen</Text>
-                <MaterialIcons name="chevron-right" size={14} color="#4cd7f6" />
-              </TouchableOpacity>
+          <View className="flex-row items-center justify-between py-1 border-t border-[#1e293b]">
+            <View>
+              <Text className="text-[13px] font-semibold text-white">Peringatan Bottleneck</Text>
+              <Text className="text-[11px] text-[#64748b]">Notifikasi jika hardware tidak seimbang</Text>
             </View>
-
-            <View className="grid grid-cols-2 gap-2.5 pt-3">
-              <View className="flex-row gap-2.5">
-                <View className="flex-1 bg-surface-container p-3 rounded-xl">
-                  <Text className="text-[11px] text-outline">Komponen Terpasang</Text>
-                  <Text className="text-[16px] font-bold text-on-surface mt-1">{filledCount} / 5 Slot</Text>
-                  <Text className="text-[10px] text-secondary mt-0.5">
-                    {filledCount === 5 ? 'Lengkap & Siap Pakai' : 'Belum Lengkap'}
-                  </Text>
-                </View>
-
-                <View className="flex-1 bg-surface-container p-3 rounded-xl">
-                  <Text className="text-[11px] text-outline">Estimasi Daya</Text>
-                  <Text className="text-[16px] font-bold text-secondary mt-1">{totalWattage} W</Text>
-                  <Text className="text-[10px] text-outline mt-0.5">PSU Rec: 750W</Text>
-                </View>
-              </View>
-
-              <View className="flex-row gap-2.5 mt-2.5">
-                <View className="flex-1 bg-surface-container p-3 rounded-xl">
-                  <Text className="text-[11px] text-outline">Total Estimasi Harga</Text>
-                  <Text className="text-[14px] font-bold text-primary mt-1" numberOfLines={1}>
-                    {formatRupiah(totalPrice)}
-                  </Text>
-                  <Text className="text-[10px] text-outline mt-0.5">
-                    {voucherApplied ? 'Voucher Rp 500rb Aktif' : 'Tanpa Voucher'}
-                  </Text>
-                </View>
-
-                <View className="flex-1 bg-surface-container p-3 rounded-xl">
-                  <Text className="text-[11px] text-outline">Bottleneck</Text>
-                  <Text className="text-[13px] font-semibold text-on-surface mt-1" numberOfLines={1}>
-                    {bottleneckText}
-                  </Text>
-                  <Text className="text-[10px] text-outline mt-0.5">Keseimbangan CPU/GPU</Text>
-                </View>
-              </View>
-            </View>
-
-            <View className="flex-row gap-2 pt-3 mt-1">
-              <TouchableOpacity
-                onPress={() => router.push('/invoice')}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-secondary/15 flex-row items-center justify-center gap-1.5"
-              >
-                <MaterialIcons name="receipt-long" size={16} color="#4cd7f6" />
-                <Text className="text-secondary text-[12px] font-semibold">Buka Invoice</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleResetBuild}
-                className="py-2.5 px-3 rounded-xl bg-surface-container-high flex-row items-center justify-center gap-1.5"
-              >
-                <MaterialIcons name="refresh" size={16} color="#c2c6d6" />
-                <Text className="text-on-surface-variant text-[12px] font-semibold">Reset Rakit</Text>
-              </TouchableOpacity>
-            </View>
+            <Switch
+              value={bottleneckAlert}
+              onValueChange={setBottleneckAlert}
+              thumbColor={bottleneckAlert ? '#38bdf8' : '#64748b'}
+              trackColor={{ false: '#1e293b', true: '#0284c7' }}
+            />
           </View>
 
-          <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20 gap-3">
-            <Text className="text-[14px] font-bold text-on-surface">Pengaturan & Preferensi</Text>
-
-            <View className="flex-row items-center justify-between py-1">
-              <View className="flex-row items-center gap-3 flex-1 pr-2">
-                <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">
-                  <MaterialIcons name="cloud-sync" size={18} color="#4cd7f6" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-[13px] font-semibold text-on-surface">Auto-Sync Cloud</Text>
-                  <Text className="text-[11px] text-outline">Simpan konfigurasi rakitan otomatis</Text>
-                </View>
-              </View>
-              <Switch
-                value={cloudSync}
-                onValueChange={setCloudSync}
-                thumbColor={cloudSync ? '#4cd7f6' : '#8c909f'}
-                trackColor={{ false: '#2e2e36', true: '#004d60' }}
-              />
+          <View className="flex-row items-center justify-between py-1 border-t border-[#1e293b]">
+            <View>
+              <Text className="text-[13px] font-semibold text-white">Notifikasi Promo & Diskon</Text>
+              <Text className="text-[11px] text-[#64748b]">Kabar voucher komponen terbaru</Text>
             </View>
-
-            <View className="flex-row items-center justify-between py-1 border-t border-surface-variant/20">
-              <View className="flex-row items-center gap-3 flex-1 pr-2">
-                <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">
-                  <MaterialIcons name="warning-amber" size={18} color="#adc6ff" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-[13px] font-semibold text-on-surface">Peringatan Bottleneck</Text>
-                  <Text className="text-[11px] text-outline">Notifikasi saat CPU & GPU tidak seimbang</Text>
-                </View>
-              </View>
-              <Switch
-                value={bottleneckAlert}
-                onValueChange={setBottleneckAlert}
-                thumbColor={bottleneckAlert ? '#adc6ff' : '#8c909f'}
-                trackColor={{ false: '#2e2e36', true: '#002e6a' }}
-              />
-            </View>
-
-            <View className="flex-row items-center justify-between py-1 border-t border-surface-variant/20">
-              <View className="flex-row items-center gap-3 flex-1 pr-2">
-                <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">
-                  <MaterialIcons name="local-offer" size={18} color="#fca5a5" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-[13px] font-semibold text-on-surface">Notifikasi Promo Diskon</Text>
-                  <Text className="text-[11px] text-outline">Dapatkan update harga promo komponen</Text>
-                </View>
-              </View>
-              <Switch
-                value={promoNotification}
-                onValueChange={setPromoNotification}
-                thumbColor={promoNotification ? '#f87171' : '#8c909f'}
-                trackColor={{ false: '#2e2e36', true: '#5a1b1b' }}
-              />
-            </View>
-          </View>
-
-          <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20 gap-2">
-            <Text className="text-[14px] font-bold text-on-surface mb-1">Aksi Akun</Text>
-
-            <TouchableOpacity
-              onPress={() =>
-                Alert.alert(
-                  'Bantuan PayCom',
-                  'Pusat bantuan & dokumentasi praktikum dapat diakses di Lab Pemrograman Mobile UMM.',
-                  [{ text: 'OK' }]
-                )
-              }
-              className="py-3 px-3 rounded-xl bg-surface-container flex-row items-center justify-between"
-            >
-              <View className="flex-row items-center gap-3">
-                <MaterialIcons name="help-center" size={20} color="#adc6ff" />
-                <Text className="text-[13px] font-medium text-on-surface">Pusat Bantuan & Panduan</Text>
-              </View>
-              <MaterialIcons name="chevron-right" size={18} color="#8c909f" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleLogout}
-              disabled={isLoggingOut}
-              className="py-3 px-3 rounded-xl bg-red-950/30 border border-red-500/20 flex-row items-center justify-between mt-1"
-            >
-              <View className="flex-row items-center gap-3">
-                <MaterialIcons name="logout" size={20} color="#f87171" />
-                <Text className="text-[13px] font-semibold text-red-400">
-                  {isLoggingOut ? 'Mengeluarkan sesi...' : 'Keluar dari Akun'}
-                </Text>
-              </View>
-              {isLoggingOut ? (
-                <ActivityIndicator size="small" color="#f87171" />
-              ) : (
-                <MaterialIcons name="chevron-right" size={18} color="#f87171" />
-              )}
-            </TouchableOpacity>
+            <Switch
+              value={promoNotification}
+              onValueChange={setPromoNotification}
+              thumbColor={promoNotification ? '#38bdf8' : '#64748b'}
+              trackColor={{ false: '#1e293b', true: '#0284c7' }}
+            />
           </View>
         </View>
       </ScrollView>
 
+      {/* Edit Profile Modal */}
       <Modal
         visible={isEditModalOpen}
         animationType="slide"
         transparent={true}
         onRequestClose={() => setIsEditModalOpen(false)}
       >
-        <View className="flex-1 justify-end bg-black/60">
+        <View className="flex-1 justify-end bg-black/70">
           <View
-            className="bg-surface-container-high rounded-t-3xl p-5 border-t border-surface-variant/30 gap-4"
+            className="bg-[#151c2c] rounded-t-3xl p-5 border-t border-[#2b3a55] gap-4"
             style={{ paddingBottom: Math.max(insets.bottom, 24) }}
           >
-            <View className="flex-row items-center justify-between pb-2 border-b border-surface-variant/20">
-              <Text className="text-[16px] font-bold text-on-surface">Edit Profil Builder</Text>
+            <View className="flex-row items-center justify-between pb-2 border-b border-[#1e293b]">
+              <Text className="text-[16px] font-bold text-white">Edit Profil</Text>
               <TouchableOpacity
                 onPress={() => setIsEditModalOpen(false)}
-                className="w-8 h-8 items-center justify-center rounded-full bg-surface-container"
+                className="w-8 h-8 items-center justify-center rounded-full bg-[#1e293b]"
               >
-                <MaterialIcons name="close" size={18} color="#c2c6d6" />
+                <MaterialIcons name="close" size={18} color="#94a3b8" />
               </TouchableOpacity>
             </View>
 
-            <View className="flex-col gap-3">
+            <View className="gap-3">
               <View>
-                <Text className="text-[11px] text-outline font-medium mb-1">Nama Lengkap</Text>
+                <Text className="text-[12px] font-semibold text-[#94a3b8] mb-1">Nama Lengkap</Text>
                 <TextInput
                   value={editName}
                   onChangeText={setEditName}
-                  editable={!isSavingProfile}
-                  placeholder="Masukkan nama"
-                  placeholderTextColor="#8c909f"
-                  className="h-11 px-3 rounded-xl bg-surface-container-lowest text-on-surface text-[13px]"
+                  className="h-12 px-3.5 rounded-2xl bg-[#0f1422] border border-[#222f46] text-white text-[13px]"
                 />
               </View>
 
               <View>
-                <Text className="text-[11px] text-outline font-medium mb-1">NIM / ID Praktikan</Text>
+                <Text className="text-[12px] font-semibold text-[#94a3b8] mb-1">NIM / ID</Text>
                 <TextInput
                   value={editNim}
                   onChangeText={setEditNim}
-                  editable={!isSavingProfile}
-                  placeholder="202210370311xxx"
-                  placeholderTextColor="#8c909f"
-                  className="h-11 px-3 rounded-xl bg-surface-container-lowest text-on-surface text-[13px]"
+                  className="h-12 px-3.5 rounded-2xl bg-[#0f1422] border border-[#222f46] text-white text-[13px]"
                 />
               </View>
 
               <View>
-                <Text className="text-[11px] text-outline font-medium mb-1">Bio / Slogan</Text>
+                <Text className="text-[12px] font-semibold text-[#94a3b8] mb-1">Bio / Status</Text>
                 <TextInput
                   value={editBio}
                   onChangeText={setEditBio}
-                  editable={!isSavingProfile}
-                  placeholder="Bio builder..."
-                  placeholderTextColor="#8c909f"
-                  className="h-11 px-3 rounded-xl bg-surface-container-lowest text-on-surface text-[13px]"
+                  multiline
+                  className="h-20 px-3.5 py-2.5 rounded-2xl bg-[#0f1422] border border-[#222f46] text-white text-[13px]"
                 />
               </View>
             </View>
@@ -640,19 +503,19 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 onPress={() => setIsEditModalOpen(false)}
                 disabled={isSavingProfile}
-                className="flex-1 py-3 rounded-xl bg-surface-container items-center justify-center"
+                className="flex-1 py-3 rounded-full bg-[#1e293b] items-center justify-center"
               >
-                <Text className="text-[13px] font-semibold text-on-surface-variant">Batal</Text>
+                <Text className="text-[13px] font-bold text-[#94a3b8]">Batal</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleSaveProfile}
                 disabled={isSavingProfile}
-                className="flex-1 py-3 rounded-xl bg-primary items-center justify-center flex-row gap-1.5"
+                className="flex-1 py-3 rounded-full bg-[#2563eb] items-center justify-center flex-row gap-1.5 shadow-md shadow-blue-600/30"
               >
-                {isSavingProfile && <ActivityIndicator size="small" color="#002e6a" />}
-                <Text className="text-[13px] font-bold text-on-primary">
-                  {isSavingProfile ? 'Menyimpan...' : 'Simpan Profil'}
+                {isSavingProfile && <ActivityIndicator size="small" color="#ffffff" />}
+                <Text className="text-[13px] font-bold text-white">
+                  {isSavingProfile ? 'Menyimpan...' : 'Simpan'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -660,39 +523,39 @@ export default function ProfileScreen() {
         </View>
       </Modal>
 
+      {/* Logout Confirmation Modal */}
       <Modal
         visible={isLogoutModalOpen}
         animationType="fade"
         transparent={true}
-        onRequestClose={() => !isLoggingOut && setIsLogoutModalOpen(false)}
+        onRequestClose={() => setIsLogoutModalOpen(false)}
       >
-        <View className="flex-1 justify-center items-center px-6 bg-black/70">
-          <View className="w-full max-w-[360px] bg-surface-container-high rounded-2xl p-5 border border-surface-variant/30 gap-4">
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-red-950/50 border border-red-500/30 items-center justify-center">
-                <MaterialIcons name="logout" size={20} color="#f87171" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-[16px] font-bold text-on-surface">Konfirmasi Keluar</Text>
-                <Text className="text-[12px] text-on-surface-variant mt-0.5">
-                  Sesi akan diakhiri dan token dihapus dari perangkat.
-                </Text>
-              </View>
+        <View className="flex-1 bg-black/70 items-center justify-center px-6">
+          <View className="w-full max-w-[340px] bg-[#151c2c] rounded-3xl p-5 border border-[#222f46] gap-4">
+            <View className="w-12 h-12 rounded-2xl bg-red-950/40 border border-red-500/30 items-center justify-center self-center">
+              <MaterialIcons name="logout" size={24} color="#f87171" />
             </View>
 
-            <View className="flex-row gap-2.5 pt-1">
+            <View className="items-center">
+              <Text className="text-[17px] font-bold text-white text-center">Keluar dari Akun?</Text>
+              <Text className="text-[12px] text-[#94a3b8] text-center mt-1">
+                Sesi akun akan diakhiri. Kamu dapat masuk kembali kapan saja.
+              </Text>
+            </View>
+
+            <View className="flex-row gap-2 pt-2">
               <TouchableOpacity
                 onPress={() => setIsLogoutModalOpen(false)}
                 disabled={isLoggingOut}
-                className="flex-1 py-3 rounded-xl bg-surface-container items-center justify-center"
+                className="flex-1 py-3 rounded-full bg-[#1e293b] items-center justify-center"
               >
-                <Text className="text-[13px] font-semibold text-on-surface-variant">Batal</Text>
+                <Text className="text-[13px] font-bold text-[#94a3b8]">Batal</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleConfirmLogout}
                 disabled={isLoggingOut}
-                className="flex-1 py-3 rounded-xl bg-red-500/90 items-center justify-center flex-row gap-1.5"
+                className="flex-1 py-3 rounded-full bg-red-600 items-center justify-center flex-row gap-1.5"
               >
                 {isLoggingOut && <ActivityIndicator size="small" color="#ffffff" />}
                 <Text className="text-[13px] font-bold text-white">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, usePathname } from 'expo-router';
@@ -10,53 +10,70 @@ function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isTabActive = (paths: string[]) => paths.includes(pathname);
+  const tabs = [
+    {
+      name: 'Komponen',
+      route: '/(tabs)',
+      match: pathname === '/' || pathname === '/(tabs)',
+      icon: 'grid-view' as const,
+    },
+    {
+      name: 'Ringkasan',
+      route: '/(tabs)/explore',
+      match: pathname.includes('explore'),
+      icon: 'layers' as const,
+    },
+    {
+      name: 'Simulasi',
+      route: '/(tabs)/simulation',
+      match: pathname.includes('simulation'),
+      icon: 'speed' as const,
+    },
+    {
+      name: 'Profil',
+      route: '/(tabs)/profile',
+      match: pathname.includes('profile'),
+      icon: 'person' as const,
+    },
+  ];
 
   return (
     <View 
-      className="absolute bottom-0 w-full z-50 bg-surface-container-lowest/95 border-t border-surface-container-low shadow-sm"
-      style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+      className="absolute bottom-0 w-full z-50 bg-[#0f1422]/95 border-t border-[#1e293b]"
+      style={{ 
+        paddingBottom: Math.max(insets.bottom, 12),
+        backdropFilter: Platform.OS === 'web' ? 'blur(16px)' : undefined,
+      }}
     >
-      <View className="flex-row justify-around items-center h-16 px-space-xs">
-        <TouchableOpacity 
-          className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
-          onPress={() => router.push('/(tabs)')}
-        >
-          <MaterialIcons name="grid-view" size={22} color={pathname === '/' || pathname === '/(tabs)' ? '#4cd7f6' : '#c2c6d6'} />
-          <Text className={`text-[11px] ${pathname === '/' || pathname === '/(tabs)' ? 'text-secondary font-semibold' : 'text-on-surface-variant font-medium'}`}>Komponen</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
-          onPress={() => router.push('/(tabs)/explore')}
-        >
-          <MaterialIcons name="analytics" size={22} color={pathname.includes('explore') ? '#4cd7f6' : '#c2c6d6'} />
-          <Text className={`text-[11px] ${pathname.includes('explore') ? 'text-secondary font-semibold' : 'text-on-surface-variant font-medium'}`}>Ringkasan</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
-          onPress={() => router.push('/(tabs)/simulation')}
-        >
-          <MaterialIcons 
-            name="speed" 
-            size={22} 
-            color={pathname.includes('simulation') ? '#4cd7f6' : '#c2c6d6'} 
-          />
-          <Text className={`text-[11px] ${pathname.includes('simulation') ? 'text-secondary font-semibold' : 'text-on-surface-variant font-medium'}`}>Simulasi</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          className="flex-col items-center justify-center min-w-[56px] h-12 gap-1"
-          onPress={() => router.push('/(tabs)/profile')}
-        >
-          <MaterialIcons 
-            name="person" 
-            size={22} 
-            color={pathname.includes('profile') ? '#4cd7f6' : '#c2c6d6'} 
-          />
-          <Text className={`text-[11px] ${pathname.includes('profile') ? 'text-secondary font-semibold' : 'text-on-surface-variant font-medium'}`}>Profil</Text>
-        </TouchableOpacity>
+      <View className="flex-row justify-around items-center h-16 px-3">
+        {tabs.map((tab) => {
+          const isActive = tab.match;
+          return (
+            <TouchableOpacity 
+              key={tab.name}
+              activeOpacity={0.7}
+              className="flex-col items-center justify-center min-w-[64px] py-1"
+              onPress={() => router.push(tab.route as any)}
+            >
+              <View className={`items-center justify-center w-10 h-7 rounded-full mb-0.5 ${isActive ? 'bg-blue-500/15' : 'bg-transparent'}`}>
+                <MaterialIcons 
+                  name={tab.icon} 
+                  size={22} 
+                  color={isActive ? '#38bdf8' : '#64748b'} 
+                />
+              </View>
+              <Text 
+                className={`text-[10px] tracking-tight ${
+                  isActive 
+                    ? 'text-[#38bdf8] font-bold' 
+                    : 'text-[#64748b] font-medium'
+                }`}
+              >
+                {tab.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -64,7 +81,13 @@ function CustomTabBar() {
 
 export default function TabLayout() {
   return (
-    <Tabs tabBar={() => <CustomTabBar />} screenOptions={{ headerShown: false }}>
+    <Tabs 
+      tabBar={() => <CustomTabBar />} 
+      screenOptions={{ 
+        headerShown: false,
+        sceneStyle: { backgroundColor: '#0b0f19' }
+      }}
+    >
       <Tabs.Screen name="index" options={{ title: "Komponen" }} />
       <Tabs.Screen name="explore" options={{ title: "Ringkasan" }} />
       <Tabs.Screen name="simulation" options={{ title: "Simulasi" }} />

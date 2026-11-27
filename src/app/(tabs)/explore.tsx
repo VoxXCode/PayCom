@@ -9,9 +9,10 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  Share,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useBuild } from '../../context/BuildContext';
 import { useAuth } from '../../context/AuthContext';
@@ -39,25 +40,18 @@ export default function SummaryScreen() {
   const [shippingOption, setShippingOption] = useState<'reguler' | 'express'>('reguler');
   const [paymentMethod, setPaymentMethod] = useState<'qris' | 'va' | 'transfer'>('qris');
   const [estimatedDelivery, setEstimatedDelivery] = useState<string>('2 - 3 Hari Kerja');
-  const [orderValidationMessage, setOrderValidationMessage] = useState<string>('');
   const [isDraftModalOpen, setIsDraftModalOpen] = useState<boolean>(false);
   const [draftName, setDraftName] = useState<string>('');
   const [isSavingDraft, setIsSavingDraft] = useState<boolean>(false);
-
-  useEffect(() => {
-    console.log('[Modul 2] SummaryScreen dimuat untuk pertama kali.');
-  }, []);
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
 
   useEffect(() => {
     if (filledCount === 0) {
       setEstimatedDelivery('Menunggu pemilihan komponen');
-      setOrderValidationMessage('Pilih komponen terlebih dahulu agar rakitan dapat diproses.');
     } else if (shippingOption === 'express') {
       setEstimatedDelivery('1 Hari (Prioritas Perakitan & Tes Cepat)');
-      setOrderValidationMessage('Pengiriman express aktif: Unit dirakit dan dikirim hari ini.');
     } else {
       setEstimatedDelivery('2 - 3 Hari Kerja (Termasuk 24 Jam Stress Test)');
-      setOrderValidationMessage('Pengiriman reguler aktif: Perakitan & pengetesan standar.');
     }
   }, [shippingOption, filledCount]);
 
@@ -71,11 +65,21 @@ export default function SummaryScreen() {
     (router as any).setParams({ shipping: option });
   };
 
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Lihat konfigurasi rakitan PC saya di PayCom Studio!\nTotal: ${formatRupiah(grandTotal)} (${filledCount} Komponen, ${totalWattage}W)`,
+      });
+    } catch (e) {
+      // Ignored
+    }
+  };
+
   const handleCheckout = () => {
     if (filledCount === 0) {
       Alert.alert(
         'Belum Ada Komponen',
-        'Silakan pilih komponen terlebih dahulu di halaman Komponen sebelum melanjutkan.',
+        'Silakan pilih komponen terlebih dahulu di halaman Komponen sebelum checkout.',
         [
           { text: 'Pilih Komponen', onPress: () => router.push('/(tabs)') },
           { text: 'Batal', style: 'cancel' }
@@ -85,9 +89,13 @@ export default function SummaryScreen() {
     }
     const paymentLabel = paymentMethod === 'qris' ? 'QRIS' : paymentMethod === 'va' ? 'Virtual Account' : 'Transfer Bank';
     Alert.alert(
-      '🎉 Pesanan Diproses!',
-      `Rakitan PC kamu (${filledCount} item) via ${paymentLabel} senilai ${formatRupiah(grandTotal)} sedang diproses. Estimasi tiba: ${estimatedDelivery}.`,
+      '🎉 Pesanan Siap Dirakit!',
+      `Rakitan PC (${filledCount} item) via ${paymentLabel} senilai ${formatRupiah(grandTotal)} sedang diproses. Estimasi tiba: ${estimatedDelivery}.`,
       [
+        {
+          text: 'Lihat Invoice',
+          onPress: () => router.push('/invoice')
+        },
         {
           text: 'Mulai Rakitan Baru',
           onPress: () => {
@@ -98,10 +106,6 @@ export default function SummaryScreen() {
         { text: 'Selesai' }
       ]
     );
-  };
-
-  const handleChat = () => {
-    Alert.alert('Chat Teknisi', 'Fitur ini menghubungkan kamu langsung dengan teknisi PayCom Studio. Segera tersedia!', [{ text: 'OK' }]);
   };
 
   const handlePDF = () => {
@@ -171,391 +175,367 @@ export default function SummaryScreen() {
   };
 
   return (
-    <View className="flex-1 bg-surface relative">
+    <View className="flex-1 bg-[#0b0f19] relative">
+      {/* Top Header matching Screen 4: Back, Title, Share, Bookmark */}
       <View 
-        className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
-        style={{ paddingTop: Math.max(insets.top, 16) }}
+        className="w-full z-40 bg-[#0b0f19]/95 border-b border-[#1e293b]"
+        style={{ paddingTop: Math.max(insets.top, 14) }}
       >
-        <View className="h-16 px-gutter flex-row items-center justify-between">
+        <View className="h-14 px-4 flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <View className="flex-row items-center gap-1">
-              <Text className="text-[20px] tracking-tight text-on-surface font-bold">
-                <Text className="text-secondary">Pay</Text>Com
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center gap-1">
-            <TouchableOpacity className="h-10 px-3 flex-row items-center gap-1.5 rounded-xl bg-surface-container-low">
-              <MaterialIcons name="language" size={16} color="#c2c6d6" />
-              <Text className="text-[12px] text-on-surface-variant font-medium">EN</Text>
-            </TouchableOpacity>
             <TouchableOpacity 
-              onPress={() => router.push('/(tabs)/profile')}
-              className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
+              onPress={() => router.push('/(tabs)')}
+              className="w-8 h-8 rounded-xl bg-[#151c2c] border border-[#222f46] items-center justify-center"
             >
-              <MaterialIcons name="person" size={20} color="#c2c6d6" />
+              <MaterialIcons name="arrow-back" size={18} color="#94a3b8" />
+            </TouchableOpacity>
+            <Text className="text-[17px] font-extrabold text-white">
+              Ringkasan Rakitan
+            </Text>
+          </View>
+
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity 
+              onPress={handleShare}
+              className="w-8 h-8 rounded-xl bg-[#151c2c] border border-[#222f46] items-center justify-center"
+            >
+              <MaterialIcons name="share" size={16} color="#94a3b8" />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              onPress={() => setIsBookmarked(!isBookmarked)}
+              className="w-8 h-8 rounded-xl bg-[#151c2c] border border-[#222f46] items-center justify-center"
+            >
+              <Ionicons 
+                name={isBookmarked ? "bookmark" : "bookmark-outline"} 
+                size={16} 
+                color={isBookmarked ? "#38bdf8" : "#94a3b8"} 
+              />
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
       <ScrollView 
-        className="flex-1 w-full bg-surface"
+        className="flex-1 w-full bg-[#0b0f19]"
         contentContainerStyle={{ 
-          paddingTop: Math.max(insets.top, 16) + 64, 
-          paddingBottom: 160 + Math.max(insets.bottom, 16) + 64 
+          paddingTop: 14,
+          paddingBottom: 150 + Math.max(insets.bottom, 16),
+          paddingHorizontal: 16,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-col w-full px-gutter pt-2 pb-6 space-y-4 gap-4">
-          
-          <View className="bg-surface-container-low rounded-xl p-3 shadow-sm">
-            <View className="flex-row items-center justify-between mb-2">
-              <View className="flex-row items-center gap-1.5">
-                <View className="w-2 h-2 rounded-full bg-secondary" />
-                <Text className="text-[12px] text-on-surface font-semibold">PayCom v1.0</Text>
-              </View>
-              <TouchableOpacity 
-                className="flex-row items-center gap-0.5"
-                onPress={() => router.push('/(tabs)')}
-              >
-                <Text className="text-[12px] text-secondary font-medium">Lihat Komponen</Text>
-                <MaterialIcons name="chevron-right" size={14} color="#4cd7f6" />
-              </TouchableOpacity>
-            </View>
-            <View className="flex-row gap-2 pt-1">
-              <View className="flex-1 flex-row items-center gap-2 bg-surface-container px-2.5 py-1.5 rounded-lg">
-                <MaterialIcons name="bolt" size={18} color="#4cd7f6" />
-                <View className="flex-col flex-1">
-                  <Text className="text-[11px] text-on-surface-variant leading-none">
-                    Daya {totalWattage}W/750W
-                  </Text>
-                  <Text className="text-[12px] text-secondary font-medium leading-tight mt-0.5" numberOfLines={1}>
-                    {filledCount > 0 ? `${capacityPercent}% Kapasitas (Aman)` : '0% Kapasitas'}
-                  </Text>
-                </View>
-              </View>
-              <View className="flex-1 flex-row items-center gap-2 bg-surface-container px-2.5 py-1.5 rounded-lg">
-                <MaterialIcons name="speed" size={18} color="#adc6ff" />
-                <View className="flex-col flex-1">
-                  <Text className="text-[11px] text-on-surface-variant leading-none">Bottleneck Indeks</Text>
-                  <Text className="text-[12px] text-primary font-medium leading-tight mt-0.5">
-                    {bottleneckText}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <TouchableOpacity 
-              onPress={() => router.push('/(tabs)/simulation')}
-              className="mt-2 py-2 px-2.5 rounded-lg bg-surface-container flex-row items-center justify-between"
-            >
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="speed" size={16} color="#4cd7f6" />
-              </View>
-              <MaterialIcons name="chevron-right" size={14} color="#4cd7f6" />
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-col gap-2 mt-2">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-[12px] text-outline font-medium">
-                Komponen Utama Terpasang ({filledCount} Item)
+        {/* Hero Rig Preview Card matching Screen 4 in reference */}
+        <View className="rounded-3xl bg-[#151c2c] border border-[#222f46] p-4 mb-4 shadow-sm relative overflow-hidden">
+          {/* Header & Badges */}
+          <View className="flex-row items-center justify-between mb-2">
+            <View className="px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30">
+              <Text className="text-[10px] font-bold text-[#38bdf8] uppercase">
+                PayCom Custom Build
               </Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)')}>
-                <Text className="text-[12px] text-secondary font-semibold">
-                  {filledCount > 0 ? 'Ubah Komponen' : '+ Pilih Komponen'}
-                </Text>
-              </TouchableOpacity>
             </View>
-
-            {filledCount === 0 ? (
-              <TouchableOpacity 
-                onPress={() => router.push('/(tabs)')}
-                className="p-4 rounded-xl border border-dashed border-outline-variant/40 bg-surface-container-low/50 items-center justify-center gap-2"
-              >
-                <MaterialIcons name="add-circle-outline" size={28} color="#4cd7f6" />
-                <Text className="text-[13px] text-on-surface font-semibold">Belum Ada Komponen Dipilih</Text>
-                <Text className="text-[12px] text-outline text-center">
-                  Buka halaman Komponen untuk mulai memilih part rakitan PC impianmu.
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-1" contentContainerStyle={{ gap: 8 }}>
-                {filledSlots.map((slot) => {
-                  const item = slot.selectedItem!;
-                  return (
-                    <View key={slot.id} className="flex-row items-center gap-2.5 p-2.5 rounded-xl bg-surface-container-high w-60 shadow-sm">
-                      <Image 
-                        source={{ uri: item.image }} 
-                        className="w-12 h-12 rounded-lg shrink-0 bg-surface-container-highest" 
-                        style={{ resizeMode: 'cover' }} 
-                      />
-                      <View className="flex-1">
-                        <Text className="text-[11px] text-outline font-medium" numberOfLines={1}>{slot.name}</Text>
-                        <Text className="text-[12px] text-on-surface font-semibold" numberOfLines={1}>{item.name}</Text>
-                        <Text className="text-[12px] text-secondary font-semibold">{formatRupiah(item.price)}</Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            )}
+            <View className="flex-row items-center gap-1">
+              <MaterialIcons name="star" size={14} color="#facc15" />
+              <MaterialIcons name="star" size={14} color="#facc15" />
+              <MaterialIcons name="star" size={14} color="#facc15" />
+              <MaterialIcons name="star" size={14} color="#facc15" />
+              <MaterialIcons name="star" size={14} color="#facc15" />
+              <Text className="text-[11px] font-bold text-white ml-1">4.9 (1.2k)</Text>
+            </View>
           </View>
 
-          <View className="rounded-xl bg-surface-container p-4 shadow-sm flex-col gap-3 mt-1">
-            <View className="flex-row items-center justify-between pb-1 border-b border-surface-variant/30">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="local-shipping" size={20} color="#4cd7f6" />
-                <Text className="text-[16px] text-on-surface font-bold">Opsi Pengiriman & Pembayaran</Text>
-              </View>
-            </View>
+          {/* Title & Price */}
+          <Text className="text-[20px] font-extrabold text-white leading-tight">
+            Next-Gen Gaming & AI Rig
+          </Text>
+          <Text className="text-[22px] font-extrabold text-[#38bdf8] mt-1">
+            {formatRupiah(totalPrice)}
+          </Text>
 
-            <View className="flex-col gap-1.5">
-              <Text className="text-[12px] text-outline font-medium">Metode Pengiriman:</Text>
-              <View className="flex-row gap-2">
-                <TouchableOpacity
-                  onPress={() => handleSelectShipping('reguler')}
-                  className={`flex-1 p-2.5 rounded-xl border ${shippingOption === 'reguler' ? 'bg-secondary/15 border-secondary' : 'bg-surface-container-low border-surface-variant/30'}`}
-                >
-                  <Text className={`text-[13px] font-semibold ${shippingOption === 'reguler' ? 'text-secondary' : 'text-on-surface'}`}>
-                    Reguler (+Rp 150rb)
-                  </Text>
-                  <Text className="text-[11px] text-on-surface-variant mt-0.5">Packing kayu + Asuransi</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleSelectShipping('express')}
-                  className={`flex-1 p-2.5 rounded-xl border ${shippingOption === 'express' ? 'bg-secondary/15 border-secondary' : 'bg-surface-container-low border-surface-variant/30'}`}
-                >
-                  <Text className={`text-[13px] font-semibold ${shippingOption === 'express' ? 'text-secondary' : 'text-on-surface'}`}>
-                    Express (+Rp 300rb)
-                  </Text>
-                  <Text className="text-[11px] text-on-surface-variant mt-0.5">Selesai rakit hari ini</Text>
-                </TouchableOpacity>
+          {/* Specifications Chips Row matching reference Screen 4 */}
+          <View className="mt-4">
+            <Text className="text-[12px] font-bold text-[#94a3b8] mb-2 uppercase tracking-wider">
+              Specifications
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              <View className="px-3 py-2 rounded-xl bg-[#0f1422] border border-[#1e293b] flex-row items-center gap-1.5">
+                <MaterialIcons name="bolt" size={14} color="#38bdf8" />
+                <Text className="text-[11px] text-white font-medium">{totalWattage}W TDP</Text>
               </View>
-            </View>
 
-            <View className="flex-col gap-1.5 mt-1">
-              <Text className="text-[12px] text-outline font-medium">Metode Pembayaran:</Text>
-              <View className="flex-row gap-2">
-                {[
-                  { id: 'qris', name: 'QRIS Instan' },
-                  { id: 'va', name: 'Virtual Account' },
-                  { id: 'transfer', name: 'Transfer Bank' }
-                ].map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => setPaymentMethod(item.id as any)}
-                    className={`flex-1 py-2 px-1.5 rounded-lg items-center border ${paymentMethod === item.id ? 'bg-primary-container border-primary' : 'bg-surface-container-low border-surface-variant/30'}`}
-                  >
-                    <Text className={`text-[11px] font-semibold ${paymentMethod === item.id ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View className="px-3 py-2 rounded-xl bg-[#0f1422] border border-[#1e293b] flex-row items-center gap-1.5">
+                <MaterialIcons name="memory" size={14} color="#38bdf8" />
+                <Text className="text-[11px] text-white font-medium">{filledCount}/5 Parts</Text>
               </View>
-            </View>
 
-            <View className="p-2.5 rounded-lg bg-surface-container-low flex-row items-center gap-2 mt-1">
-              <MaterialIcons name="schedule" size={16} color="#4cd7f6" />
-              <View className="flex-1">
-                <Text className="text-[11px] text-outline font-medium">Estimasi Waktu Tiba:</Text>
-                <Text className="text-[12px] text-secondary font-semibold">{estimatedDelivery}</Text>
+              <View className="px-3 py-2 rounded-xl bg-[#0f1422] border border-[#1e293b] flex-row items-center gap-1.5">
+                <MaterialIcons name="speed" size={14} color="#38bdf8" />
+                <Text className="text-[11px] text-white font-medium">{bottleneckText}</Text>
+              </View>
+
+              <View className="px-3 py-2 rounded-xl bg-[#0f1422] border border-[#1e293b] flex-row items-center gap-1.5">
+                <MaterialIcons name="verified" size={14} color="#38bdf8" />
+                <Text className="text-[11px] text-white font-medium">Garansi 1 Thn</Text>
               </View>
             </View>
           </View>
 
-          <View className="rounded-xl bg-surface-container p-4 shadow-sm flex-col space-y-3 mt-2 gap-3">
-            <View className="flex-row items-center justify-between pb-2 border-b border-surface-variant/30">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="receipt-long" size={20} color="#4cd7f6" />
-                <Text className="text-[17px] text-on-surface font-bold">Rincian Biaya Transparan</Text>
-              </View>
-              <View className="px-2 py-0.5 rounded-full bg-surface-container-high">
-                <Text className="text-[11px] text-on-surface-variant font-medium">IDR / B2C</Text>
-              </View>
-            </View>
-
-            <View className="flex-col gap-2.5 pt-1">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-[14px] text-on-surface">Subtotal Komponen</Text>
-                  <View className="px-2 py-0.5 rounded bg-surface-container-high">
-                    <Text className="text-[11px] text-on-surface-variant font-medium">{filledCount} Item</Text>
-                  </View>
-                </View>
-                <Text className="text-[14px] text-on-surface font-bold">{formatRupiah(totalPrice)}</Text>
-              </View>
-              
-              <View className="flex-row items-center justify-between">
-                <View className="flex-col">
-                  <Text className="text-[14px] text-on-surface">Perakitan & Cable Mgmt</Text>
-                  <Text className="text-[12px] text-outline">Thermal paste Noctua NT-H2 applied</Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-[12px] line-through text-outline">Rp 250.000</Text>
-                  <View className="px-2 py-0.5 rounded-full bg-secondary-container">
-                    <Text className="text-[11px] text-on-secondary-container font-bold">Gratis</Text>
-                  </View>
-                </View>
-              </View>
-
-              <View className="flex-row items-center justify-between">
-                <View className="flex-col">
-                  <Text className="text-[14px] text-on-surface">Stress Test 24 Jam Non-Stop</Text>
-                  <Text className="text-[12px] text-outline">Cinebench R23, Furmark, MemTest86</Text>
-                </View>
-                <View className="px-2 py-0.5 rounded-full bg-secondary-container">
-                  <Text className="text-[11px] text-on-secondary-container font-bold">Termasuk</Text>
-                </View>
-              </View>
-
-              <View className="flex-row items-center justify-between">
-                <View className="flex-col">
-                  <View className="flex-row items-center gap-1.5">
-                    <Text className="text-[14px] text-on-surface">Asuransi Pengiriman Proteksi</Text>
-                    <MaterialIcons name="verified-user" size={14} color="#4cd7f6" />
-                  </View>
-                  <Text className="text-[12px] text-outline">Klaim instan unit baru jika cacat logistik</Text>
-                </View>
-                <Text className="text-[14px] text-on-surface font-semibold">{formatRupiah(shippingFee)}</Text>
-              </View>
-
-              {voucherApplied && filledCount > 0 && totalPrice > 500000 && (
-                <View className="flex-row items-center justify-between p-2.5 rounded-lg bg-surface-container-high mt-1">
-                  <View className="flex-row items-center gap-2">
-                    <View className="w-6 h-6 rounded bg-primary-container items-center justify-center">
-                      <MaterialIcons name="confirmation-number" size={14} color="#002e6a" />
-                    </View>
-                    <View className="flex-col">
-                      <Text className="text-[12px] text-primary font-bold">NEONPC2025</Text>
-                      <Text className="text-[12px] text-on-surface-variant">Promo Builder Fest</Text>
-                    </View>
-                  </View>
-                  <View className="flex-row items-center gap-2">
-                    <Text className="text-[14px] text-secondary font-bold">-Rp 500.000</Text>
-                    <TouchableOpacity onPress={handleRemoveVoucher} className="w-6 h-6 rounded items-center justify-center">
-                      <MaterialIcons name="close" size={14} color="#8c909f" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-
-              <View className="flex-row items-center justify-between pt-2">
-                <View className="flex-row items-center gap-1.5">
-                  <Text className="text-[14px] text-on-surface">Garansi PayCom 1-to-1</Text>
-                  <Text className="text-[12px] text-secondary font-semibold">365 Hari</Text>
-                </View>
-                <View className="px-2 py-0.5 rounded-full bg-surface-container-high">
-                  <Text className="text-[11px] text-secondary font-bold">Termasuk</Text>
-                </View>
-              </View>
-            </View>
-
-            <View className="mt-2 bg-surface-container-highest/60 p-4 rounded-b-xl flex-row items-center justify-between" style={{ marginHorizontal: -16, marginBottom: -16 }}>
-              <View className="flex-col">
-                <Text className="text-[12px] text-outline font-medium">Total Pembayaran</Text>
-                <Text className="text-[12px] text-on-surface-variant">PPN 11% sudah termasuk</Text>
-              </View>
-              <View className="flex-col items-end">
-                <Text className="text-[22px] text-primary font-bold tracking-tight">
-                  {formatRupiah(grandTotal)}
-                </Text>
-                {totalSavings > 0 && filledCount > 0 && (
-                  <Text className="text-[12px] text-secondary font-semibold">
-                    Hemat {formatRupiah(totalSavings)}
-                  </Text>
-                )}
-              </View>
+          {/* Highlights bullet points matching reference Screen 4 */}
+          <View className="mt-4 pt-3 border-t border-[#1e293b]">
+            <Text className="text-[12px] font-bold text-[#94a3b8] mb-1.5 uppercase tracking-wider">
+              Highlights
+            </Text>
+            <View className="gap-1">
+              <Text className="text-[11px] text-slate-300">• Ultra-quiet Cooling & Noctua NT-H2 Applied</Text>
+              <Text className="text-[11px] text-slate-300">• 24 Jam Non-Stop Stress Testing Certified</Text>
+              <Text className="text-[11px] text-slate-300">• Professional Cable Routing with Custom Velcro</Text>
             </View>
           </View>
+        </View>
 
-          <View className="rounded-xl bg-surface-container-low p-4 shadow-sm flex-col gap-3 mt-2">
-            <Text className="text-[12px] text-outline font-semibold">Standar Perakitan Studio PayCom</Text>
-            <View className="flex-col gap-2.5">
-              <View className="flex-row items-start gap-3 p-2.5 rounded-lg bg-surface-container">
-                <View className="w-7 h-7 rounded-lg bg-secondary/15 items-center justify-center shrink-0">
-                  <MaterialIcons name="verified" size={16} color="#4cd7f6" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-[14px] font-semibold text-on-surface leading-tight">100% Produk Original Distributor Resmi</Text>
-                  <Text className="text-[12px] text-on-surface-variant mt-0.5">Garansi resmi TAM, Synnex Metrodata, & Astrindo terdaftar serial number.</Text>
-                </View>
-              </View>
-              <View className="flex-row items-start gap-3 p-2.5 rounded-lg bg-surface-container">
-                <View className="w-7 h-7 rounded-lg bg-secondary/15 items-center justify-center shrink-0">
-                  <MaterialIcons name="cable" size={16} color="#4cd7f6" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-[14px] font-semibold text-on-surface leading-tight">Pro Cable Management & Airflow Optimal</Text>
-                  <Text className="text-[12px] text-on-surface-variant mt-0.5">Rute kabel tersembunyi dengan velcro kustom untuk jalur sirkulasi suhu stabil.</Text>
-                </View>
-              </View>
-              <View className="flex-row items-start gap-3 p-2.5 rounded-lg bg-surface-container">
-                <View className="w-7 h-7 rounded-lg bg-secondary/15 items-center justify-center shrink-0">
-                  <MaterialIcons name="inventory-2" size={16} color="#4cd7f6" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-[14px] font-semibold text-on-surface leading-tight">Free Packing Kayu Berasuransi Penuh</Text>
-                  <Text className="text-[12px] text-on-surface-variant mt-0.5">Ekstra bantalan airbag busa internal & peti kayu ekspedisi tahan banting antarkota.</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          <View className="flex-col gap-2.5 pt-1 mt-2">
-            <View className="flex-row gap-2">
-              <TouchableOpacity className="flex-1 py-3 px-3 rounded-xl bg-surface-container flex-row items-center justify-center gap-1.5" onPress={handleChat}>
-                <MaterialIcons name="chat-bubble" size={18} color="#4cd7f6" />
-                <Text className="text-on-surface text-[12px] font-medium">Chat Teknisi</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="flex-1 py-3 px-3 rounded-xl bg-surface-container flex-row items-center justify-center gap-1.5" onPress={handlePDF}>
-                <MaterialIcons name="picture-as-pdf" size={18} color="#adc6ff" />
-                <Text className="text-on-surface text-[12px] font-medium">Cetak Invoice</Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity className="w-full py-3 px-4 rounded-xl bg-surface-container-low flex-row items-center justify-center gap-2" onPress={handleDraft}>
-              <MaterialIcons name="cloud-upload" size={18} color="#4cd7f6" />
-              <Text className="text-secondary text-[12px] font-semibold">Simpan ke Draft Rakitan Cloud</Text>
+        {/* Installed Components Carousel / List */}
+        <View className="mb-4">
+          <View className="flex-row items-center justify-between mb-2.5">
+            <Text className="text-[13px] font-bold text-[#94a3b8] uppercase tracking-wider">
+              Komponen Terpasang ({filledCount})
+            </Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)')}>
+              <Text className="text-[12px] font-bold text-[#38bdf8]">Ubah Part</Text>
             </TouchableOpacity>
           </View>
+
+          {filledCount === 0 ? (
+            <TouchableOpacity 
+              onPress={() => router.push('/(tabs)')}
+              className="p-5 rounded-2xl border border-dashed border-[#2b3a55] bg-[#151c2c] items-center justify-center gap-2"
+            >
+              <MaterialIcons name="add-circle-outline" size={28} color="#38bdf8" />
+              <Text className="text-[13px] text-white font-bold">Belum Ada Komponen Dipilih</Text>
+              <Text className="text-[11px] text-[#94a3b8] text-center">
+                Buka tab Komponen untuk mulai memilih part PC rakitan impianmu.
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 10 }}
+            >
+              {filledSlots.map((slot) => {
+                const item = slot.selectedItem!;
+                return (
+                  <View 
+                    key={slot.id} 
+                    className="w-56 p-3 rounded-2xl bg-[#151c2c] border border-[#222f46] flex-row items-center gap-3 shadow-sm"
+                  >
+                    <Image 
+                      source={{ uri: item.image }} 
+                      className="w-12 h-12 rounded-xl bg-[#0f1422] shrink-0" 
+                      style={{ resizeMode: 'cover' }} 
+                    />
+                    <View className="flex-1">
+                      <Text className="text-[10px] font-bold text-[#38bdf8] uppercase" numberOfLines={1}>
+                        {slot.name}
+                      </Text>
+                      <Text className="text-[12px] text-white font-bold mt-0.5" numberOfLines={1}>
+                        {item.name}
+                      </Text>
+                      <Text className="text-[11px] text-[#94a3b8] font-bold mt-0.5">
+                        {formatRupiah(item.price)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          )}
+        </View>
+
+        {/* Shipping & Payment Section */}
+        <View className="rounded-2xl bg-[#151c2c] border border-[#222f46] p-4 mb-4 gap-3">
+          <View className="flex-row items-center justify-between pb-2 border-b border-[#1e293b]">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="local-shipping" size={18} color="#38bdf8" />
+              <Text className="text-[14px] font-bold text-white">Pengiriman & Pembayaran</Text>
+            </View>
+          </View>
+
+          {/* Shipping selection cards */}
+          <View className="gap-2">
+            <Text className="text-[11px] font-semibold text-[#94a3b8]">Pilih Ekspedisi:</Text>
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                onPress={() => handleSelectShipping('reguler')}
+                className={`flex-1 p-3 rounded-xl border ${
+                  shippingOption === 'reguler' 
+                    ? 'bg-blue-600/15 border-blue-500' 
+                    : 'bg-[#0f1422] border-[#1e293b]'
+                }`}
+              >
+                <Text className={`text-[12px] font-bold ${
+                  shippingOption === 'reguler' ? 'text-[#38bdf8]' : 'text-white'
+                }`}>
+                  Reguler (+150rb)
+                </Text>
+                <Text className="text-[10px] text-[#94a3b8] mt-0.5">Packing kayu + Asuransi</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleSelectShipping('express')}
+                className={`flex-1 p-3 rounded-xl border ${
+                  shippingOption === 'express' 
+                    ? 'bg-blue-600/15 border-blue-500' 
+                    : 'bg-[#0f1422] border-[#1e293b]'
+                }`}
+              >
+                <Text className={`text-[12px] font-bold ${
+                  shippingOption === 'express' ? 'text-[#38bdf8]' : 'text-white'
+                }`}>
+                  Express (+300rb)
+                </Text>
+                <Text className="text-[10px] text-[#94a3b8] mt-0.5">Rakit & kirim hari ini</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Payment selection chips */}
+          <View className="gap-2 mt-1">
+            <Text className="text-[11px] font-semibold text-[#94a3b8]">Metode Bayar:</Text>
+            <View className="flex-row gap-2">
+              {[
+                { id: 'qris', name: 'QRIS' },
+                { id: 'va', name: 'Virtual Account' },
+                { id: 'transfer', name: 'Transfer' }
+              ].map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() => setPaymentMethod(item.id as any)}
+                  className={`flex-1 py-2 px-1 rounded-xl items-center border ${
+                    paymentMethod === item.id 
+                      ? 'bg-[#2563eb] border-[#2563eb]' 
+                      : 'bg-[#0f1422] border-[#1e293b]'
+                  }`}
+                >
+                  <Text className={`text-[11px] font-bold ${
+                    paymentMethod === item.id ? 'text-white' : 'text-[#94a3b8]'
+                  }`}>
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View className="p-2.5 rounded-xl bg-[#0f1422] flex-row items-center gap-2 mt-1">
+            <MaterialIcons name="schedule" size={16} color="#38bdf8" />
+            <View className="flex-1">
+              <Text className="text-[10px] text-[#64748b]">Estimasi Tiba:</Text>
+              <Text className="text-[11px] text-white font-semibold">{estimatedDelivery}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Pricing Breakdown Card */}
+        <View className="rounded-2xl bg-[#151c2c] border border-[#222f46] p-4 mb-4 gap-2.5">
+          <View className="flex-row items-center justify-between pb-2 border-b border-[#1e293b]">
+            <Text className="text-[14px] font-bold text-white">Rincian Pembayaran</Text>
+            <View className="px-2 py-0.5 rounded-full bg-blue-500/20">
+              <Text className="text-[10px] font-bold text-[#38bdf8]">IDR / Resmi</Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-center justify-between py-1">
+            <Text className="text-[12px] text-[#94a3b8]">Subtotal ({filledCount} Komponen)</Text>
+            <Text className="text-[13px] font-bold text-white">{formatRupiah(totalPrice)}</Text>
+          </View>
+
+          <View className="flex-row items-center justify-between py-1">
+            <Text className="text-[12px] text-[#94a3b8]">Perakitan & Cable Mgmt</Text>
+            <Text className="text-[12px] font-bold text-[#38bdf8]">Gratis (Hemat 250rb)</Text>
+          </View>
+
+          <View className="flex-row items-center justify-between py-1">
+            <Text className="text-[12px] text-[#94a3b8]">Ongkir & Asuransi</Text>
+            <Text className="text-[13px] font-bold text-white">{formatRupiah(shippingFee)}</Text>
+          </View>
+
+          {voucherApplied && filledCount > 0 && totalPrice > 500000 && (
+            <View className="flex-row items-center justify-between p-2.5 rounded-xl bg-blue-950/30 border border-blue-500/30 my-1">
+              <View className="flex-row items-center gap-1.5">
+                <MaterialIcons name="confirmation-number" size={14} color="#38bdf8" />
+                <Text className="text-[11px] text-[#38bdf8] font-bold">NEONPC2025</Text>
+              </View>
+              <View className="flex-row items-center gap-2">
+                <Text className="text-[12px] text-[#38bdf8] font-bold">-Rp 500.000</Text>
+                <TouchableOpacity onPress={handleRemoveVoucher}>
+                  <MaterialIcons name="close" size={14} color="#94a3b8" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          <View className="flex-row items-center justify-between pt-2 border-t border-[#1e293b]">
+            <Text className="text-[14px] font-bold text-white">Grand Total</Text>
+            <Text className="text-[18px] font-extrabold text-[#38bdf8]">
+              {formatRupiah(grandTotal)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Quick action tools */}
+        <View className="flex-row gap-2 mb-6">
+          <TouchableOpacity 
+            onPress={handlePDF}
+            className="flex-1 py-3 rounded-xl bg-[#151c2c] border border-[#222f46] flex-row items-center justify-center gap-1.5"
+          >
+            <MaterialIcons name="receipt" size={16} color="#38bdf8" />
+            <Text className="text-white text-[12px] font-bold">Lihat Invoice</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={handleDraft}
+            className="flex-1 py-3 rounded-xl bg-[#151c2c] border border-[#222f46] flex-row items-center justify-center gap-1.5"
+          >
+            <MaterialIcons name="cloud-upload" size={16} color="#38bdf8" />
+            <Text className="text-white text-[12px] font-bold">Simpan ke Cloud</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
+      {/* Draft Save Modal */}
       <Modal
         visible={isDraftModalOpen}
         animationType="slide"
         transparent={true}
         onRequestClose={() => setIsDraftModalOpen(false)}
       >
-        <View className="flex-1 justify-end bg-black/60">
+        <View className="flex-1 justify-end bg-black/70">
           <View
-            className="bg-surface-container-high rounded-t-3xl p-5 border-t border-surface-variant/30 gap-4"
+            className="bg-[#151c2c] rounded-t-3xl p-5 border-t border-[#2b3a55] gap-4"
             style={{ paddingBottom: Math.max(insets.bottom, 24) }}
           >
-            <View className="flex-row items-center justify-between pb-2 border-b border-surface-variant/20">
-              <Text className="text-[16px] font-bold text-on-surface">Simpan Draft ke Cloud</Text>
+            <View className="flex-row items-center justify-between pb-2 border-b border-[#1e293b]">
+              <Text className="text-[16px] font-bold text-white">Simpan Draft ke Cloud</Text>
               <TouchableOpacity
                 onPress={() => setIsDraftModalOpen(false)}
                 disabled={isSavingDraft}
-                className="w-8 h-8 items-center justify-center rounded-full bg-surface-container"
+                className="w-8 h-8 items-center justify-center rounded-full bg-[#1e293b]"
               >
-                <MaterialIcons name="close" size={18} color="#c2c6d6" />
+                <MaterialIcons name="close" size={18} color="#94a3b8" />
               </TouchableOpacity>
             </View>
 
             <View className="gap-2">
-              <Text className="text-[12px] text-outline font-medium">Nama Rakitan</Text>
+              <Text className="text-[12px] text-[#94a3b8] font-semibold">Nama Rakitan</Text>
               <TextInput
                 value={draftName}
                 onChangeText={setDraftName}
                 editable={!isSavingDraft}
                 placeholder="Contoh: PC Gaming 4K RTX"
-                placeholderTextColor="#8c909f"
-                className="h-12 px-3 rounded-xl bg-surface-container-lowest text-on-surface text-[14px]"
+                placeholderTextColor="#64748b"
+                className="h-12 px-3.5 rounded-2xl bg-[#0f1422] border border-[#222f46] text-white text-[13px]"
               />
-              <Text className="text-[11px] text-on-surface-variant">
+              <Text className="text-[11px] text-[#64748b]">
                 {filledCount} komponen • {totalWattage}W • {formatRupiah(totalPrice)}
               </Text>
             </View>
@@ -564,18 +544,18 @@ export default function SummaryScreen() {
               <TouchableOpacity
                 onPress={() => setIsDraftModalOpen(false)}
                 disabled={isSavingDraft}
-                className="flex-1 py-3 rounded-xl bg-surface-container items-center justify-center"
+                className="flex-1 py-3 rounded-full bg-[#1e293b] items-center justify-center"
               >
-                <Text className="text-[13px] font-semibold text-on-surface-variant">Batal</Text>
+                <Text className="text-[13px] font-bold text-[#94a3b8]">Batal</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleConfirmSaveDraft}
                 disabled={isSavingDraft}
-                className="flex-1 py-3 rounded-xl bg-primary items-center justify-center flex-row gap-1.5"
+                className="flex-1 py-3 rounded-full bg-[#2563eb] items-center justify-center flex-row gap-1.5 shadow-md shadow-blue-600/30"
               >
-                {isSavingDraft && <ActivityIndicator size="small" color="#002e6a" />}
-                <Text className="text-[13px] font-bold text-on-primary">
+                {isSavingDraft && <ActivityIndicator size="small" color="#ffffff" />}
+                <Text className="text-[13px] font-bold text-white">
                   {isSavingDraft ? 'Menyimpan...' : 'Simpan Cloud'}
                 </Text>
               </TouchableOpacity>
@@ -584,46 +564,43 @@ export default function SummaryScreen() {
         </View>
       </Modal>
 
+      {/* Sticky Bottom Action Bar matching Screen 4 in reference */}
       <View 
-        className="absolute left-4 right-4 z-40 bg-surface-container-lowest/95 rounded-2xl p-3.5 flex-col gap-2.5 shadow-md"
-        style={{ bottom: Math.max(insets.bottom, 16) + 64 + 16 }}
+        className="absolute left-0 right-0 z-50 bg-[#0f1422]/98 border-t border-[#1e293b] px-4 py-3 shadow-2xl"
+        style={{ bottom: Math.max(insets.bottom, 12) + 54 }}
       >
-        <View className="flex-row items-center justify-between px-1">
+        <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-[12px] text-on-surface-variant">Total Estimasi Rakitan</Text>
-            <View className="flex-row items-baseline gap-1.5 mt-0.5">
-              <Text className="text-[20px] text-on-surface font-bold tracking-tight">
-                {formatRupiah(grandTotal > 0 ? grandTotal : totalPrice)}
-              </Text>
-              <Text className="text-[12px] text-outline font-medium">({filledCount} Item)</Text>
-            </View>
+            <Text className="text-[10px] text-[#64748b] font-medium uppercase tracking-wider">
+              Pricing Total
+            </Text>
+            <Text className="text-[18px] font-extrabold text-white">
+              {formatRupiah(grandTotal > 0 ? grandTotal : totalPrice)}
+            </Text>
+            <Text className="text-[10px] text-[#38bdf8]">
+              {filledCount} Komponen Terpilih
+            </Text>
           </View>
-          <TouchableOpacity 
-            className="flex-row items-center gap-0.5"
-            onPress={() => router.push('/(tabs)')}
-          >
-            <Text className="text-[12px] text-secondary font-medium">Ubah Part</Text>
-            <MaterialIcons name="chevron-right" size={16} color="#4cd7f6" />
-          </TouchableOpacity>
-        </View>
-        
-        <View className="flex-row gap-2">
-          <TouchableOpacity 
-            className="flex-2 flex-row items-center justify-center gap-1.5 py-3 px-2 rounded-xl bg-surface-container-high"
-            style={{ flex: 2 }}
-            onPress={handleCheckout}
-          >
-            <MaterialIcons name="build-circle" size={18} color="#4cd7f6" />
-            <Text className="text-on-surface text-[14px] font-semibold" numberOfLines={1}>Selesaikan</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            className="flex-row items-center justify-center gap-2 py-3 px-3 rounded-xl bg-primary-container"
-            style={{ flex: 3 }}
-            onPress={handleCheckout}
-          >
-            <MaterialIcons name="shopping-cart-checkout" size={20} color="#002e6a" />
-            <Text className="text-on-primary text-[15px] font-bold" numberOfLines={1}>Beli Rakitan</Text>
-          </TouchableOpacity>
+
+          {/* Dual Action Buttons matching Screen 4 reference */}
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity 
+              onPress={handleDraft}
+              className="px-3.5 py-3 rounded-full bg-[#151c2c] border border-[#222f46] flex-row items-center gap-1"
+            >
+              <MaterialIcons name="bookmark-border" size={16} color="#94a3b8" />
+              <Text className="text-[#94a3b8] text-[12px] font-bold">Draft</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              onPress={handleCheckout}
+              activeOpacity={0.85}
+              className="px-5 py-3 rounded-full bg-[#2563eb] flex-row items-center gap-1.5 shadow-lg shadow-blue-600/40"
+            >
+              <MaterialIcons name="flash-on" size={16} color="#ffffff" />
+              <Text className="text-white text-[13px] font-bold">Buy Now</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>

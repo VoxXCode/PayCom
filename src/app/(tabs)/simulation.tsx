@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
@@ -34,11 +34,14 @@ export default function SimulationScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>('laptops');
   const [isLoadingApi, setIsLoadingApi] = useState<boolean>(true);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [isGridView, setIsGridView] = useState<boolean>(true);
+  const [sortOption, setSortOption] = useState<'default' | 'price-asc' | 'price-desc' | 'rating'>('default');
 
   const [isBenchmarking, setIsBenchmarking] = useState<boolean>(false);
   const [benchmarkProgressText, setBenchmarkProgressText] = useState<string>('Siap menjalankan simulasi rakitan.');
   const [benchmarkReport, setBenchmarkReport] = useState<RigBenchmarkReport | null>(null);
   const [benchmarkError, setBenchmarkError] = useState<string | null>(null);
+  const [showBenchmarkSuite, setShowBenchmarkSuite] = useState<boolean>(true);
 
   useEffect(() => {
     loadExternalApiData(selectedCategory);
@@ -130,111 +133,172 @@ export default function SimulationScreen() {
       });
   };
 
+  const categories = [
+    { label: 'All', key: 'laptops' },
+    { label: 'Laptops', key: 'laptops' },
+    { label: 'Smartphones', key: 'smartphones' },
+    { label: 'Tablets', key: 'tablets' },
+  ];
+
+  const sortedProducts = [...externalProducts].sort((a, b) => {
+    if (sortOption === 'price-asc') return a.price - b.price;
+    if (sortOption === 'price-desc') return b.price - a.price;
+    if (sortOption === 'rating') return b.rating - a.rating;
+    return 0;
+  });
+
   return (
-    <View className="flex-1 bg-surface relative">
+    <View className="flex-1 bg-[#0b0f19] relative">
       <StatusBar style="light" />
 
+      {/* Top Header matching Screen 3 "Electronics Collection" */}
       <View 
-        className="absolute top-0 w-full z-50 bg-surface-container-lowest/80 shadow-sm"
-        style={{ paddingTop: Math.max(insets.top, 16) }}
+        className="w-full z-40 bg-[#0b0f19]/95 border-b border-[#1e293b]"
+        style={{ paddingTop: Math.max(insets.top, 14) }}
       >
-        <View className="h-16 px-gutter flex-row items-center justify-between">
+        <View className="h-14 px-4 flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <View className="flex-row items-center gap-1">
-              <Text className="text-[20px] tracking-tight text-on-surface font-bold">
-                <Text className="text-secondary">Pay</Text>Com
-              </Text>
-            </View>
+            <TouchableOpacity 
+              onPress={() => router.push('/(tabs)')}
+              className="w-8 h-8 rounded-xl bg-[#151c2c] border border-[#222f46] items-center justify-center"
+            >
+              <MaterialIcons name="arrow-back" size={18} color="#94a3b8" />
+            </TouchableOpacity>
+            <Text className="text-[17px] font-extrabold text-white">
+              Hardware Collection
+            </Text>
           </View>
 
-          <TouchableOpacity 
-            onPress={() => router.push('/(tabs)/profile')}
-            className="w-10 h-10 items-center justify-center rounded-xl bg-surface-container-low"
+          {/* Sort Dropdown & View Mode */}
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity 
+              onPress={() => {
+                const nextSort = sortOption === 'default' ? 'price-asc' : sortOption === 'price-asc' ? 'price-desc' : sortOption === 'price-desc' ? 'rating' : 'default';
+                setSortOption(nextSort);
+              }}
+              className="h-8 px-2.5 rounded-xl bg-[#151c2c] border border-[#222f46] flex-row items-center gap-1"
+            >
+              <Text className="text-[11px] font-semibold text-[#94a3b8]">
+                {sortOption === 'default' ? 'Sort' : sortOption === 'price-asc' ? 'Harga ↑' : sortOption === 'price-desc' ? 'Harga ↓' : 'Rating ★'}
+              </Text>
+              <MaterialIcons name="keyboard-arrow-down" size={16} color="#94a3b8" />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              onPress={() => setIsGridView(!isGridView)}
+              className="w-8 h-8 rounded-xl bg-[#151c2c] border border-[#222f46] items-center justify-center"
+            >
+              <MaterialIcons name={isGridView ? "view-list" : "grid-view"} size={16} color="#38bdf8" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Category Pills horizontally scrollable matching reference */}
+        <View className="pb-3 pt-1">
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
           >
-            <MaterialIcons name="person" size={20} color="#c2c6d6" />
-          </TouchableOpacity>
+            {categories.map((cat, idx) => {
+              const isActive = selectedCategory === cat.key && (idx === 0 ? selectedCategory === 'laptops' : true);
+              return (
+                <TouchableOpacity
+                  key={`${cat.key}-${idx}`}
+                  onPress={() => setSelectedCategory(cat.key)}
+                  activeOpacity={0.8}
+                  className={`px-4 py-2 rounded-full border ${
+                    isActive 
+                      ? 'bg-[#2563eb] border-[#2563eb]' 
+                      : 'bg-[#151c2c] border-[#222f46]'
+                  }`}
+                >
+                  <Text className={`text-[12px] font-bold ${
+                    isActive ? 'text-white' : 'text-[#94a3b8]'
+                  }`}>
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </View>
       </View>
 
       <ScrollView
-        className="flex-1 w-full bg-surface"
+        className="flex-1 w-full bg-[#0b0f19]"
         contentContainerStyle={{
-          paddingTop: Math.max(insets.top, 16) + 64,
-          paddingBottom: 32 + 64 + Math.max(insets.bottom, 16),
+          paddingTop: 14,
+          paddingBottom: 40 + 64 + Math.max(insets.bottom, 16),
+          paddingHorizontal: 16,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-col w-full px-gutter py-4 gap-5">
+        {/* Benchmark Simulation Telemetry Card */}
+        <View className="rounded-2xl bg-[#151c2c] border border-[#222f46] p-4 mb-5 shadow-sm">
+          <TouchableOpacity 
+            onPress={() => setShowBenchmarkSuite(!showBenchmarkSuite)}
+            className="flex-row items-center justify-between"
+          >
+            <View className="flex-row items-center gap-2">
+              <View className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 items-center justify-center">
+                <MaterialIcons name="speed" size={18} color="#38bdf8" />
+              </View>
+              <View>
+                <Text className="text-[14px] font-bold text-white">Simulasi Benchmark Rig</Text>
+                <Text className="text-[11px] text-[#94a3b8]">Uji beban performa & tegangan daya</Text>
+              </View>
+            </View>
+            <MaterialIcons 
+              name={showBenchmarkSuite ? "expand-less" : "expand-more"} 
+              size={22} 
+              color="#94a3b8" 
+            />
+          </TouchableOpacity>
 
-          <View className="rounded-2xl p-4 bg-surface-container-high border border-surface-variant/20 shadow-md relative overflow-hidden">
-            <View className="absolute -top-12 -right-12 w-32 h-32 bg-secondary/15 rounded-full" />
-
-            <View className="flex-row items-start justify-between">
-              <View className="flex-1 pr-2">
-                <View className="flex-row items-center gap-1.5">
+          {showBenchmarkSuite && (
+            <View className="mt-4 pt-3 border-t border-[#1e293b] gap-3">
+              {/* Telemetry Stats */}
+              <View className="flex-row gap-2">
+                <View className="flex-1 bg-[#0f1422] p-2.5 rounded-xl border border-[#1e293b]">
+                  <Text className="text-[10px] text-[#64748b]">Slot Rig</Text>
+                  <Text className="text-[13px] font-bold text-white mt-0.5">{filledCount}/5 Terpasang</Text>
                 </View>
-                <Text className="text-[17px] text-on-surface font-bold mt-1">
-                  Simulasi Asynchronous & API
-                </Text>
-                <Text className="text-[12px] text-on-surface-variant mt-0.5 leading-relaxed">
-                  Menjalankan benchmark asynchronous bertahap dengan Promise, resolve(), reject(), .then(), serta mengambil data pasar dari External API.
-                </Text>
+                <View className="flex-1 bg-[#0f1422] p-2.5 rounded-xl border border-[#1e293b]">
+                  <Text className="text-[10px] text-[#64748b]">Daya Sistem</Text>
+                  <Text className="text-[13px] font-bold text-[#38bdf8] mt-0.5">{totalWattage} Watt</Text>
+                </View>
+                <View className="flex-1 bg-[#0f1422] p-2.5 rounded-xl border border-[#1e293b]">
+                  <Text className="text-[10px] text-[#64748b]">Bottleneck</Text>
+                  <Text className="text-[12px] font-bold text-white mt-0.5" numberOfLines={1}>{bottleneckText}</Text>
+                </View>
               </View>
-              <View className="w-10 h-10 rounded-xl bg-secondary/20 items-center justify-center">
-                <MaterialIcons name="speed" size={22} color="#4cd7f6" />
-              </View>
-            </View>
-          </View>
 
-          <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20">
-            <View className="flex-row items-center justify-between pb-3 border-b border-surface-variant/20">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="developer-board" size={18} color="#4cd7f6" />
-                <Text className="text-[14px] font-bold text-on-surface">Spesifikasi Rig Aktif</Text>
-              </View>
-              <TouchableOpacity onPress={() => router.push('/(tabs)')}>
-                <Text className="text-[12px] text-secondary font-medium">Ubah Rakitan</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View className="flex-row gap-2 pt-3">
-              <View className="flex-1 bg-surface-container p-2.5 rounded-xl">
-                <Text className="text-[10px] text-outline">Komponen</Text>
-                <Text className="text-[14px] font-bold text-on-surface mt-0.5">{filledCount} / 5 Slot</Text>
-              </View>
-              <View className="flex-1 bg-surface-container p-2.5 rounded-xl">
-                <Text className="text-[10px] text-outline">Total Daya</Text>
-                <Text className="text-[14px] font-bold text-secondary mt-0.5">{totalWattage} Watt</Text>
-              </View>
-              <View className="flex-1 bg-surface-container p-2.5 rounded-xl">
-                <Text className="text-[10px] text-outline">Estimasi Biaya</Text>
-                <Text className="text-[13px] font-bold text-primary mt-0.5" numberOfLines={1}>{formatRupiah(totalPrice)}</Text>
-              </View>
-            </View>
-
-            <View className="mt-4 pt-3 border-t border-surface-variant/20 gap-2.5">
-              <View className="p-3 rounded-xl bg-surface-container-high border border-surface-variant/30 flex-row items-center gap-3">
+              {/* Status bar */}
+              <View className="p-3 rounded-xl bg-[#0f1422] border border-[#1e293b] flex-row items-center gap-2.5">
                 {isBenchmarking ? (
-                  <ActivityIndicator size="small" color="#4cd7f6" />
+                  <ActivityIndicator size="small" color="#38bdf8" />
                 ) : (
-                  <MaterialIcons name="insights" size={18} color="#adc6ff" />
+                  <MaterialIcons name="insights" size={18} color="#38bdf8" />
                 )}
-                <Text className="text-[12px] text-on-surface font-medium flex-1">
+                <Text className="text-[11px] text-white font-medium flex-1">
                   {benchmarkProgressText}
                 </Text>
               </View>
 
-              <View className="flex-row gap-2 pt-1">
+              {/* Action Buttons */}
+              <View className="flex-row gap-2">
                 <TouchableOpacity
                   disabled={isBenchmarking}
                   onPress={handleStartBenchmark}
-                  className={`flex-1 py-3 px-3 rounded-xl flex-row items-center justify-center gap-1.5 ${
-                    isBenchmarking ? 'bg-surface-container-high opacity-60' : 'bg-primary shadow-sm'
+                  activeOpacity={0.85}
+                  className={`flex-1 py-3 px-3 rounded-xl flex-row items-center justify-center gap-1.5 bg-[#2563eb] shadow-md shadow-blue-600/30 ${
+                    isBenchmarking ? 'opacity-60' : 'active:bg-blue-700'
                   }`}
                 >
-                  <MaterialIcons name="play-arrow" size={18} color="#002e6a" />
-                  <Text className="text-on-primary text-[13px] font-bold">
-                    {isBenchmarking ? 'Menguji...' : 'Mulai Benchmark'}
+                  <MaterialIcons name="play-arrow" size={18} color="#ffffff" />
+                  <Text className="text-white text-[12px] font-bold">
+                    {isBenchmarking ? 'Menjalankan...' : 'Mulai Benchmark'}
                   </Text>
                 </TouchableOpacity>
 
@@ -244,7 +308,7 @@ export default function SimulationScreen() {
                   className="px-3 py-3 rounded-xl bg-red-950/40 border border-red-500/30 flex-row items-center justify-center gap-1"
                 >
                   <MaterialIcons name="warning" size={16} color="#f87171" />
-                  <Text className="text-red-400 text-[12px] font-semibold">Uji .reject()</Text>
+                  <Text className="text-red-400 text-[11px] font-bold">Demo .reject()</Text>
                 </TouchableOpacity>
               </View>
 
@@ -256,38 +320,38 @@ export default function SimulationScreen() {
               )}
 
               {benchmarkReport && (
-                <View className="mt-2 p-4 rounded-2xl bg-secondary/10 border border-secondary/30 gap-2.5">
+                <View className="p-3.5 rounded-xl bg-blue-950/20 border border-blue-500/30 gap-2">
                   <View className="flex-row items-center justify-between">
                     <View>
-                      <Text className="text-[11px] text-secondary font-bold uppercase">Hasil Skor Benchmark</Text>
-                      <Text className="text-[22px] font-extrabold text-on-surface mt-0.5">
+                      <Text className="text-[10px] text-[#38bdf8] font-bold uppercase">Skor Benchmark Rig</Text>
+                      <Text className="text-[20px] font-extrabold text-white mt-0.5">
                         {benchmarkReport.overallScore.toLocaleString('id-ID')} Pts
                       </Text>
                     </View>
-                    <View className="px-3 py-1.5 rounded-xl bg-secondary/20 border border-secondary/40 items-end">
-                      <Text className="text-[10px] text-outline">Tier Kinerja:</Text>
-                      <Text className="text-[12px] font-bold text-secondary">{benchmarkReport.tier}</Text>
+                    <View className="px-3 py-1 rounded-xl bg-blue-500/20 border border-blue-400/30 items-end">
+                      <Text className="text-[9px] text-[#94a3b8]">Tier Kinerja</Text>
+                      <Text className="text-[12px] font-bold text-[#38bdf8]">{benchmarkReport.tier}</Text>
                     </View>
                   </View>
 
-                  <Text className="text-[11px] text-on-surface-variant bg-surface-container-lowest/60 p-2.5 rounded-lg">
+                  <Text className="text-[11px] text-slate-300 bg-[#0f1422] p-2 rounded-lg">
                     {benchmarkReport.powerSafety}
                   </Text>
 
-                  <View className="gap-1.5 pt-1">
+                  <View className="gap-1 pt-1">
                     {benchmarkReport.stages.map((stg, idx) => (
-                      <View key={idx} className="flex-row items-center justify-between py-1 border-t border-surface-variant/20">
+                      <View key={idx} className="flex-row items-center justify-between py-1 border-t border-[#1e293b]">
                         <View className="flex-row items-center gap-1.5 flex-1 pr-2">
                           <MaterialIcons
                             name={stg.status === 'passed' ? 'check-circle' : 'warning'}
                             size={14}
-                            color={stg.status === 'passed' ? '#4cd7f6' : '#f87171'}
+                            color={stg.status === 'passed' ? '#38bdf8' : '#f87171'}
                           />
-                          <Text className="text-[11px] text-on-surface font-medium" numberOfLines={1}>
+                          <Text className="text-[11px] text-white" numberOfLines={1}>
                             {stg.stageName}
                           </Text>
                         </View>
-                        <Text className="text-[12px] font-mono font-bold text-primary">
+                        <Text className="text-[11px] font-mono font-bold text-[#38bdf8]">
                           {stg.score.toLocaleString('id-ID')}
                         </Text>
                       </View>
@@ -296,84 +360,73 @@ export default function SimulationScreen() {
                 </View>
               )}
             </View>
-          </View>
-
-          <View className="rounded-2xl p-4 bg-surface-container-low border border-surface-variant/20 gap-3">
-            <View className="flex-row items-center justify-between">
-              <View>
-                <View className="flex-row items-center gap-1.5">
-                  <MaterialIcons name="cloud" size={16} color="#4cd7f6" />
-                  <Text className="text-[14px] font-bold text-on-surface">Katalog External API</Text>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                onPress={handleReloadWithPromise}
-                className="px-2.5 py-1.5 rounded-xl bg-surface-container-high border border-surface-variant/30 flex-row items-center gap-1"
-              >
-                <MaterialIcons name="sync" size={14} color="#4cd7f6" />
-                <Text className="text-[11px] text-secondary font-medium">Via .then()</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View className="flex-row gap-2 pt-1">
-              {[
-                { label: 'Laptops', key: 'laptops' },
-                { label: 'Smartphones', key: 'smartphones' },
-                { label: 'Tablets', key: 'tablets' },
-              ].map((cat) => (
-                <TouchableOpacity
-                  key={cat.key}
-                  onPress={() => setSelectedCategory(cat.key)}
-                  className={`flex-1 py-2 rounded-xl items-center justify-center border ${
-                    selectedCategory === cat.key
-                      ? 'bg-secondary/20 border-secondary'
-                      : 'bg-surface-container border-surface-variant/20'
-                  }`}
-                >
-                  <Text
-                    className={`text-[12px] font-semibold ${
-                      selectedCategory === cat.key ? 'text-secondary' : 'text-on-surface-variant'
-                    }`}
-                  >
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {isLoadingApi ? (
-              <Loading message={`Mengambil data kategori "${selectedCategory}" dari DummyJSON API...`} />
-            ) : apiError ? (
-              <ErrorMessage
-                message={apiError}
-                onRetry={() => loadExternalApiData(selectedCategory)}
-              />
-            ) : (
-              <View className="pt-2">
-                <Text className="text-[11px] text-outline mb-2">
-                  Ditemukan {externalProducts.length} produk bertipe Interface ExternalProduct:
-                </Text>
-                {externalProducts.map((prod) => (
-                  <ExternalProductCard
-                    key={prod.id}
-                    product={prod}
-                    onPress={() => {
-                      Alert.alert(
-                        prod.title,
-                        `Brand: ${prod.brand || '-'}\nKategori: ${prod.category}\nHarga: $${prod.price}\nStok: ${prod.stock}\nRating: ⭐ ${prod.rating}\n\nDeskripsi:\n${prod.description}`,
-                        [{ text: 'Tutup' }]
-                      );
-                    }}
-                  />
-                ))}
-              </View>
-            )}
-          </View>
-
+          )}
         </View>
+
+        {/* Section Header: Hardware Catalog */}
+        <View className="flex-row items-center justify-between mb-3">
+          <View>
+            <Text className="text-[16px] font-extrabold text-white">
+              Koleksi Hardware ({sortedProducts.length})
+            </Text>
+            <Text className="text-[11px] text-[#94a3b8]">
+              Data live dari DummyJSON External API
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={handleReloadWithPromise}
+            className="px-2.5 py-1.5 rounded-xl bg-[#151c2c] border border-[#222f46] flex-row items-center gap-1"
+          >
+            <MaterialIcons name="sync" size={14} color="#38bdf8" />
+            <Text className="text-[11px] text-[#38bdf8] font-bold">Refresh .then()</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Products Display (Grid matching Screen 3 or List) */}
+        {isLoadingApi ? (
+          <Loading message={`Mengambil data katalog "${selectedCategory}"...`} />
+        ) : apiError ? (
+          <ErrorMessage
+            message={apiError}
+            onRetry={() => loadExternalApiData(selectedCategory)}
+          />
+        ) : isGridView ? (
+          <View className="flex-row flex-wrap justify-between">
+            {sortedProducts.map((prod) => (
+              <ExternalProductCard
+                key={prod.id}
+                product={prod}
+                isGrid={true}
+                onPress={() => {
+                  Alert.alert(
+                    prod.title,
+                    `Brand: ${prod.brand || '-'}\nKategori: ${prod.category}\nHarga: $${prod.price}\nStok: ${prod.stock}\nRating: ⭐ ${prod.rating}\n\nDeskripsi:\n${prod.description}`,
+                    [{ text: 'Tutup' }]
+                  );
+                }}
+              />
+            ))}
+          </View>
+        ) : (
+          <View>
+            {sortedProducts.map((prod) => (
+              <ExternalProductCard
+                key={prod.id}
+                product={prod}
+                isGrid={false}
+                onPress={() => {
+                  Alert.alert(
+                    prod.title,
+                    `Brand: ${prod.brand || '-'}\nKategori: ${prod.category}\nHarga: $${prod.price}\nStok: ${prod.stock}\nRating: ⭐ ${prod.rating}\n\nDeskripsi:\n${prod.description}`,
+                    [{ text: 'Tutup' }]
+                  );
+                }}
+              />
+            ))}
+          </View>
+        )}
       </ScrollView>
     </View>
   );
 }
-
